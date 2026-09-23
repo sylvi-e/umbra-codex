@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Next.js and local build output
+.next/
+.vercel/
+.vinext/
+dist/
+coverage/
+
+# Local environment files (keep the documented example)
+.env
+.env.*
+!.env.example
+
+# Supabase local state
+supabase/.temp/
+supabase/.branches/
+
+# Logs and editor files
+*.log
+.DS_Store
+.idea/
+.vscode/
+
+# TypeScript incremental cache
+*.tsbuildinfo
