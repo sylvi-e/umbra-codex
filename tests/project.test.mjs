@@ -14,6 +14,7 @@ const characterArsenalPath = new URL("../components/umbra/character-arsenal-edit
 const campaignsPath = new URL("../components/umbra/campaigns.tsx", import.meta.url);
 const campaignDeleteMigrationPath = new URL("../supabase/migrations/20260922130000_allow_admin_delete_campaigns.sql", import.meta.url);
 const characterRulesPath = new URL("../lib/character-rules.ts", import.meta.url);
+const coloredTextPath = new URL("../components/umbra/colored-text.tsx", import.meta.url);
 const attributeModifierMigrationPath = new URL("../supabase/migrations/20260922013525_enforce_base_attribute_modifier.sql", import.meta.url);
 
 test("todas as tabelas sensíveis ativam RLS", async () => {
@@ -84,6 +85,14 @@ test("o frontend usa apenas publishable key", async () => {
   const source = await readFile(clientPath, "utf8");
   assert.match(source, /NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);
   assert.doesNotMatch(source, /service_role|SUPABASE_SECRET/i);
+});
+
+test("textos coloridos usam códigos seguros sem interpretar HTML", async () => {
+  const source = await readFile(coloredTextPath, "utf8");
+  assert.match(source, /&\(\[0-9a-fr\]\)/i);
+  assert.match(source, /code === "r"/);
+  assert.match(source, /minecraftColors/);
+  assert.doesNotMatch(source, /dangerouslySetInnerHTML|innerHTML/);
 });
 
 test("cargo administrativo não vem do cadastro público", async () => {

@@ -25,6 +25,7 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeading } from "@/components/umbra/page-heading";
 import { DiceRoller } from "@/components/umbra/dice-roller";
+import { ColoredText } from "@/components/umbra/colored-text";
 import { createClient } from "@/lib/supabase/client";
 import { formatAttributeModifier } from "@/lib/character-rules";
 type Row = Record<string, unknown>;
@@ -286,8 +287,8 @@ export function CharacterView({ characterId }: { characterId: string }) {
                       <li key={String(skill.id)} className="rounded-xl bg-white/[.03] p-3">
                         <strong className="text-sm">{String(skill.name)}</strong>
                         {skill.rank_name ? <span className="ml-2 text-xs text-violet-300">{String(skill.rank_name)}</span> : null}
-                        {skill.description ? <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-400">{String(skill.description)}</p> : null}
-                        {skill.effect ? <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-500">Efeito: {String(skill.effect)}</p> : null}
+                        {skill.description ? <ColoredText text={String(skill.description)} className="mt-2 block text-sm text-zinc-400" /> : null}
+                        {skill.effect ? <p className="mt-2 text-sm text-zinc-500">Efeito: <ColoredText text={String(skill.effect)} /></p> : null}
                       </li>
                     ))}
                   </ul>
@@ -370,7 +371,7 @@ export function CharacterView({ characterId }: { characterId: string }) {
                 const wide = ["description", "physical_description", "appearance", "effect", "mechanical_effects", "enchantments", "history", "notes", "personality", "summon_condition"].includes(key);
                 return <div key={key} className={`rounded-xl border border-white/[.07] bg-black/20 p-3 ${wide ? "sm:col-span-2" : ""}`}>
                   <dt className="text-xs font-semibold uppercase tracking-wider text-zinc-500">{label}</dt>
-                  <dd className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-zinc-200">{displayed}</dd>
+                  <dd className="mt-1 break-words text-sm leading-6 text-zinc-200">{wide ? <ColoredText text={displayed} /> : displayed}</dd>
                 </div>;
               })}
             </dl>
@@ -482,9 +483,7 @@ function Text({ title, value }: { title: string; value: unknown }) {
   return (
     <div className="mt-5 first:mt-0">
       <h3 className="text-sm font-medium text-zinc-300">{title}</h3>
-      <p className="mt-2 whitespace-pre-wrap text-sm leading-7 text-zinc-500">
-        {String(value)}
-      </p>
+      <ColoredText text={String(value)} className="mt-2 block text-sm leading-7 text-zinc-500" />
     </div>
   );
 }

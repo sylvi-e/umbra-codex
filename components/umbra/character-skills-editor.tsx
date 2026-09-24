@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { ColoredText, ColoredTextarea } from "@/components/umbra/colored-text";
 import { createClient } from "@/lib/supabase/client";
 
 type Skill = {
@@ -112,7 +112,7 @@ export function CharacterSkillsEditor({ characterId }: { characterId?: string })
               <div className="min-w-0">
                 <h3 className="font-medium text-zinc-100">{skill.name}</h3>
                 {[skill.category, skill.rank_name].filter(Boolean).length ? <p className="mt-1 text-xs text-violet-300">{[skill.category, skill.rank_name].filter(Boolean).join(" · ")}</p> : null}
-                {skill.description ? <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-400">{skill.description}</p> : null}
+                {skill.description ? <ColoredText text={skill.description} className="mt-2 block text-sm text-zinc-400" /> : null}
               </div>
               <Button type="button" size="icon" variant="ghost" onClick={() => startEdit(skill)} aria-label={`Editar ${skill.name}`}><Pencil size={16} /></Button>
             </li>
@@ -135,7 +135,7 @@ export function CharacterSkillsEditor({ characterId }: { characterId?: string })
             {(["description", "effect"] as const).map((field) => (
               <div key={field} className="space-y-2 sm:col-span-2">
                 <Label htmlFor={`skill-${field}`}>{field === "description" ? "Descrição" : "Efeito"}</Label>
-                <Textarea id={`skill-${field}`} value={form[field]} onChange={(event) => update(field, event.target.value)} className="min-h-24 border-white/10 bg-black/25" />
+                <ColoredTextarea id={`skill-${field}`} value={form[field]} onChange={(value) => update(field, value)} />
               </div>
             ))}
           </div>

@@ -24,7 +24,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -36,6 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeading } from "@/components/umbra/page-heading";
 import { CharacterArsenalEditor } from "@/components/umbra/character-arsenal-editor";
 import { CharacterSkillsEditor } from "@/components/umbra/character-skills-editor";
+import { ColoredTextarea } from "@/components/umbra/colored-text";
 import { useAuth } from "@/components/umbra/auth-provider";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -1112,11 +1112,10 @@ function LongField({
   return (
     <div className="mb-4 space-y-2 last:mb-0">
       <Label htmlFor={name}>{label}</Label>
-      <Textarea
+      <ColoredTextarea
         id={name}
-        rows={4}
-        className="border-white/10 bg-black/20"
-        {...form.register(name)}
+        value={String(form.watch(name) ?? "")}
+        onChange={(value) => form.setValue(name, value as never, { shouldDirty: true, shouldValidate: true })}
       />
     </div>
   );
