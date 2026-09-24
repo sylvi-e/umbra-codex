@@ -102,7 +102,7 @@ export default function Home() {
               <p className="text-xs font-semibold uppercase tracking-[.18em] text-violet-300/75">
                 Registro desperto
               </p>
-              <h2 className="mt-1 font-serif text-3xl">Grisha Luméris</h2>
+              <h2 className="mt-1 font-serif text-3xl">Clara Monteiro</h2>
             </div>
             <span className="rounded-full border border-cyan-300/15 bg-cyan-300/5 px-3 py-1 text-sm text-cyan-200">
               Desperto
