@@ -34,9 +34,9 @@ export function CharacterNotesEditor({ value, onChange }: { value: string; onCha
       replacement = `${marker}${selected || (format === "bold" ? "texto em negrito" : "texto em itálico")}${marker}`;
       selectionOffset = marker.length;
     } else {
-      const prefix = format === "heading" ? "## " : format === "bullet" ? "- " : format === "numbered" ? "1. " : "> ";
+      const prefix = format === "heading" ? "## " : format === "bullet" ? "- " : "> ";
       const target = value.slice(lineStart, end);
-      replacement = target.split("\n").map((line) => `${prefix}${line}`).join("\n");
+      replacement = target.split("\n").map((line, index) => `${format === "numbered" ? `${index + 1}. ` : prefix}${line}`).join("\n");
       onChange(`${value.slice(0, lineStart)}${replacement}${value.slice(end)}`);
       requestAnimationFrame(() => textarea?.focus());
       return;
@@ -47,6 +47,28 @@ export function CharacterNotesEditor({ value, onChange }: { value: string; onCha
       textarea?.focus();
       const nextStart = start + selectionOffset;
       textarea?.setSelectionRange(nextStart, nextStart + (selected.length || replacement.length - selectionOffset * 2));
+    });
+  }
+
+  function continueList(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) return;
+
+    const textarea = event.currentTarget;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const lineStart = value.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+    const currentLine = value.slice(lineStart, start);
+    const marker = currentLine.match(/^(\s*)(-\s|([0-9]+)\.\s)/);
+    if (!marker) return;
+
+    event.preventDefault();
+    const nextMarker = marker[3] ? `${Number(marker[3]) + 1}. ` : "- ";
+    const insertion = `\n${marker[1]}${nextMarker}`;
+    onChange(`${value.slice(0, start)}${insertion}${value.slice(end)}`);
+    requestAnimationFrame(() => {
+      const nextPosition = start + insertion.length;
+      textarea.focus();
+      textarea.setSelectionRange(nextPosition, nextPosition);
     });
   }
 
@@ -69,7 +91,7 @@ export function CharacterNotesEditor({ value, onChange }: { value: string; onCha
           ))}
         </div>
       ) : null}
-      <Textarea ref={textareaRef} value={value} onChange={(event) => onChange(event.target.value)} rows={14} className="min-h-72 resize-y border-white/10 bg-black/20 leading-7" placeholder="Registre pistas, planos, acontecimentos e lembretes da aventura…" />
+      <Textarea ref={textareaRef} value={value} onChange={(event) => onChange(event.target.value)} onKeyDown={continueList} rows={14} className="min-h-72 resize-y border-white/10 bg-black/20 leading-7" placeholder="Registre pistas, planos, acontecimentos e lembretes da aventura…" />
     </div>
   );
 }

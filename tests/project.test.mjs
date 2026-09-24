@@ -114,6 +114,9 @@ test("notas podem ser formatadas na edição e visualizadas na ficha", async () 
   assert.match(view, /FormattedNotes content=\{notes\}/);
   assert.match(notes, /Formatar texto/);
   assert.match(notes, /Negrito|Itálico|Lista numerada/);
+  assert.match(notes, /function continueList/);
+  assert.match(notes, /Number\(marker\[3\]\) \+ 1/);
+  assert.match(notes, /onKeyDown=\{continueList\}/);
   assert.doesNotMatch(notes, /dangerouslySetInnerHTML|innerHTML/);
 });
 
