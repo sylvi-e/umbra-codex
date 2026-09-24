@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  PersonStanding,
   Settings,
   Shield,
   UserRound,
@@ -47,6 +48,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (!configured) return <SetupPending />;
   if (!user) return <Loading />;
   const isAdmin = profile?.role === "admin";
+  const visiblePlayerNav = isAdmin
+    ? [
+        ...playerNav.slice(0, 2),
+        { href: "/npcs", label: "NPCs", icon: PersonStanding },
+        ...playerNav.slice(2),
+      ]
+    : playerNav;
+  const inNpcArea = pathname === "/npcs" || pathname.startsWith("/npcs/");
   async function signOut() {
     await createClient()?.auth.signOut();
     router.replace("/login");
@@ -75,7 +84,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Button>
         </div>
         <nav className="mt-8 space-y-1" aria-label="Principal">
-          {playerNav.map((item) => (
+          {visiblePlayerNav.map((item) => (
             <NavItem
               key={item.href}
               {...item}
@@ -154,7 +163,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             size="sm"
             className="ml-auto bg-violet-600 hover:bg-violet-500"
           >
-            <Link href="/fichas/nova">Nova ficha</Link>
+            <Link href={inNpcArea ? "/npcs/nova" : "/fichas/nova"}>{inNpcArea ? "Novo NPC" : "Nova ficha"}</Link>
           </Button>
         </header>
         <main className="mx-auto w-full max-w-[1500px] p-4 sm:p-6 lg:p-8">
@@ -162,10 +171,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
       <nav
-        className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-4 rounded-2xl border border-white/10 bg-[#111018]/95 p-1 shadow-2xl backdrop-blur-xl lg:hidden"
+        className={`fixed inset-x-3 bottom-3 z-40 grid ${isAdmin ? "grid-cols-5" : "grid-cols-4"} rounded-2xl border border-white/10 bg-[#111018]/95 p-1 shadow-2xl backdrop-blur-xl lg:hidden`}
         aria-label="Navegação móvel"
       >
-        {playerNav.map((item) => (
+        {visiblePlayerNav.map((item) => (
           <Link
             key={item.href}
             href={item.href}

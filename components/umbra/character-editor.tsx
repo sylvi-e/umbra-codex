@@ -196,8 +196,10 @@ const defaults: FormValues = {
   trueNameMeaning: "",
   trueNameEffect: "",
 };
-export function CharacterEditor({ characterId }: { characterId?: string }) {
+export function CharacterEditor({ characterId, kind = "player" }: { characterId?: string; kind?: "player" | "npc" }) {
   const router = useRouter();
+  const isNpc = kind === "npc";
+  const basePath = isNpc ? "/npcs" : "/fichas";
   const { user } = useAuth();
   const [activeId, setActiveId] = useState(characterId);
   const [loading, setLoading] = useState(Boolean(characterId));
@@ -279,6 +281,10 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
       .then(([sheetResult, statsResult, aspectResult, flawResult]) => {
         if (sheetResult.error) throw sheetResult.error;
         const s = sheetResult.data;
+        if (Boolean(s.is_npc) !== isNpc) {
+          router.replace(`${s.is_npc ? "/npcs" : "/fichas"}/${characterId}/editar`);
+          return;
+        }
         const rawStats = (statsResult.data ?? []) as DbStatRow[];
         const stats = new Map<string, DbStatRow>(
           rawStats.map((row) => [row.stat_key, row]),
@@ -349,7 +355,7 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
         toast.error(
           reason instanceof Error ? reason.message : "Ficha não encontrada",
         );
-        router.replace("/fichas");
+        router.replace(basePath);
       })
       .finally(() => setLoading(false));
   }, [characterId, form, router]);
@@ -418,13 +424,13 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
       } else {
         const { data, error } = await client
           .from("character_sheets")
-          .insert({ ...sheet, owner_id: user.id })
+          .insert({ ...sheet, owner_id: user.id, is_npc: isNpc })
           .select("id")
           .single();
         if (error) throw error;
         id = data.id;
         setActiveId(id);
-        router.replace(`/fichas/${id}/editar`);
+        router.replace(`${basePath}/${id}/editar`);
       }
       if (!id) throw new Error("Não foi possível identificar a ficha salva.");
       const characterKey = id;
@@ -550,8 +556,8 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
   return (
     <form onSubmit={form.handleSubmit(() => save())}>
       <PageHeading
-        eyebrow={activeId ? "Editando registro" : "Novo registro"}
-        title={form.watch("name") || "Personagem sem nome"}
+        eyebrow={activeId ? (isNpc ? "Editando NPC" : "Editando registro") : (isNpc ? "Novo NPC" : "Novo registro")}
+        title={form.watch("name") || (isNpc ? "NPC sem nome" : "Personagem sem nome")}
         description="As alterações válidas são salvas automaticamente."
         action={
           <div className="flex items-center gap-3">

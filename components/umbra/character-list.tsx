@@ -23,8 +23,10 @@ import { PageHeading } from "@/components/umbra/page-heading";
 import { CharacterPortraitThumbnail } from "@/components/umbra/character-portrait";
 import { createClient } from "@/lib/supabase/client";
 import type { CharacterSummary } from "@/lib/types";
-export function CharacterList() {
+export function CharacterList({ kind = "player" }: { kind?: "player" | "npc" }) {
   const router = useRouter();
+  const isNpc = kind === "npc";
+  const basePath = isNpc ? "/npcs" : "/fichas";
   const [items, setItems] = useState<CharacterSummary[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -34,6 +36,7 @@ export function CharacterList() {
     const { data, error } = await client
       .from("character_summary")
       .select("*")
+      .eq("is_npc", isNpc)
       .is("archived_at", null)
       .order("updated_at", { ascending: false });
     if (error) toast.error(error.message);
@@ -71,20 +74,20 @@ export function CharacterList() {
     if (error) toast.error(error.message);
     else {
       toast.success("Ficha duplicada");
-      router.push(`/fichas/${String(data)}/editar`);
+      router.push(`${basePath}/${String(data)}/editar`);
     }
   }
   return (
     <>
       <PageHeading
-        eyebrow="Arquivo de personagens"
-        title="Suas fichas"
-        description="Pesquise, abra, duplique ou arquive registros."
+        eyebrow={isNpc ? "Controle do mestre" : "Arquivo de personagens"}
+        title={isNpc ? "NPCs" : "Suas fichas"}
+        description={isNpc ? "Crie e organize fichas de personagens não jogáveis." : "Pesquise, abra, duplique ou arquive registros."}
         action={
           <Button asChild className="bg-violet-600 hover:bg-violet-500">
-            <Link href="/fichas/nova">
+            <Link href={`${basePath}/nova`}>
               <Plus />
-              Nova ficha
+              {isNpc ? "Novo NPC" : "Nova ficha"}
             </Link>
           </Button>
         }
@@ -108,7 +111,7 @@ export function CharacterList() {
           {filtered.map((item) => (
             <article key={item.id} className="grim-card rounded-2xl p-5">
               <div className="flex items-start justify-between">
-                <Link href={`/fichas/${item.id}`} className="min-w-0">
+                <Link href={`${basePath}/${item.id}`} className="min-w-0">
                   <p className="text-xs uppercase tracking-[.12em] text-violet-300/70">
                     {item.rank_name ?? "Sem rank"}
                   </p>
@@ -156,10 +159,10 @@ export function CharacterList() {
                   variant="outline"
                   className="flex-1 border-white/10"
                 >
-                  <Link href={`/fichas/${item.id}`}>Abrir</Link>
+                  <Link href={`${basePath}/${item.id}`}>Abrir</Link>
                 </Button>
                 <Button asChild className="flex-1 bg-violet-600/80">
-                  <Link href={`/fichas/${item.id}/editar`}>Editar</Link>
+                  <Link href={`${basePath}/${item.id}/editar`}>Editar</Link>
                 </Button>
               </div>
             </article>
@@ -168,9 +171,9 @@ export function CharacterList() {
       ) : (
         <div className="grim-card rounded-2xl p-10 text-center">
           <BookOpenText className="mx-auto text-violet-300" />
-          <h2 className="mt-4 font-serif text-2xl">Nenhuma ficha encontrada</h2>
+          <h2 className="mt-4 font-serif text-2xl">{isNpc ? "Nenhum NPC encontrado" : "Nenhuma ficha encontrada"}</h2>
           <p className="mt-2 text-zinc-500">
-            Crie um personagem ou ajuste sua pesquisa.
+            {isNpc ? "Crie um NPC ou ajuste sua pesquisa." : "Crie um personagem ou ajuste sua pesquisa."}
           </p>
         </div>
       )}

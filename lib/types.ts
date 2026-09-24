@@ -22,5 +22,6 @@ export type CharacterSummary = {
   max_essence: number;
   updated_at: string;
   archived_at: string | null;
+  is_npc: boolean;
 };
 export type SaveState = "idle" | "saving" | "saved" | "error";

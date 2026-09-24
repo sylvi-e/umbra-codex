@@ -21,6 +21,8 @@ const pinnedNotesMigrationPath = new URL("../supabase/migrations/20260924202702_
 const characterPortraitPath = new URL("../components/umbra/character-portrait.tsx", import.meta.url);
 const portraitMigrationPath = new URL("../supabase/migrations/20260924154000_add_character_portraits_storage.sql", import.meta.url);
 const attributeModifierMigrationPath = new URL("../supabase/migrations/20260922013525_enforce_base_attribute_modifier.sql", import.meta.url);
+const npcMigrationPath = new URL("../supabase/migrations/20260924210250_add_admin_npcs.sql", import.meta.url);
+const npcReadPolicyMigrationPath = new URL("../supabase/migrations/20260924210300_restrict_npc_sheet_reads.sql", import.meta.url);
 
 test("todas as tabelas sensíveis ativam RLS", async () => {
   const sql = await readFile(migrationPath, "utf8");
@@ -347,4 +349,25 @@ test("campos removidos não aparecem na interface da ficha", async () => {
     assert.doesNotMatch(editor, new RegExp(`label=[\"']${label}[\"']`));
   }
   assert.doesNotMatch(identityView, /[\"'](?:Descrição física|Objetivos|Origem|Ocupação)[\"']/);
+});
+
+test("NPCs usam fichas separadas e são exclusivos de administradores", async () => {
+  const migration = await readFile(npcMigrationPath, "utf8");
+  const readPolicyMigration = await readFile(npcReadPolicyMigrationPath, "utf8");
+  const shell = await readFile(new URL("../components/umbra/app-shell.tsx", import.meta.url), "utf8");
+  const list = await readFile(new URL("../components/umbra/character-list.tsx", import.meta.url), "utf8");
+  const editor = await readFile(characterEditorPath, "utf8");
+  const npcPage = await readFile(new URL("../app/npcs/page.tsx", import.meta.url), "utf8");
+
+  assert.match(migration, /is_npc boolean not null default false/);
+  assert.match(migration, /s\.is_npc and private\.is_admin\(\)/);
+  assert.match(migration, /not is_npc or private\.is_admin\(\)/);
+  assert.match(migration, /security_invoker = true/);
+  assert.match(readPolicyMigration, /using \(private\.can_view_character\(id\)\)/);
+  assert.match(shell, /href: "\/npcs", label: "NPCs"/);
+  assert.match(shell, /profile\?\.role === "admin"/);
+  assert.match(list, /\.eq\("is_npc", isNpc\)/);
+  assert.match(editor, /is_npc: isNpc/);
+  assert.match(npcPage, /<AdminOnly>/);
+  assert.match(npcPage, /<CharacterList kind="npc"/);
 });

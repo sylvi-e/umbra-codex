@@ -49,7 +49,8 @@ type Stat = {
   max_value: number | null;
   notes: string | null;
 };
-export function CharacterView({ characterId }: { characterId: string }) {
+export function CharacterView({ characterId, kind = "player" }: { characterId: string; kind?: "player" | "npc" }) {
+  const basePath = kind === "npc" ? "/npcs" : "/fichas";
   const [data, setData] = useState<Row | null>(null);
   const [stats, setStats] = useState<Stat[]>([]);
   const [aspect, setAspect] = useState<Row | null>(null);
@@ -204,7 +205,7 @@ export function CharacterView({ characterId }: { characterId: string }) {
               Exportar
             </Button>
             <Button asChild className="bg-violet-600 hover:bg-violet-500">
-              <Link href={`/fichas/${characterId}/editar`}>
+              <Link href={`${basePath}/${characterId}/editar`}>
                 <Edit3 />
                 Editar
               </Link>
