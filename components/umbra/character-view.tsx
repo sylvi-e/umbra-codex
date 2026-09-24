@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Archive,
   BookOpenText,
+  NotebookPen,
   Boxes,
   Download,
   Dumbbell,
@@ -26,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeading } from "@/components/umbra/page-heading";
 import { DiceRoller } from "@/components/umbra/dice-roller";
 import { ColoredText } from "@/components/umbra/colored-text";
+import { FormattedNotes } from "@/components/umbra/character-notes";
 import { createClient } from "@/lib/supabase/client";
 import { formatAttributeModifier } from "@/lib/character-rules";
 type Row = Record<string, unknown>;
@@ -52,6 +54,7 @@ export function CharacterView({ characterId }: { characterId: string }) {
   const [stats, setStats] = useState<Stat[]>([]);
   const [aspect, setAspect] = useState<Row | null>(null);
   const [flaw, setFlaw] = useState<Row | null>(null);
+  const [notes, setNotes] = useState("");
   const [collections, setCollections] = useState<{
     skills: Row[];
     memories: Row[];
@@ -63,7 +66,7 @@ export function CharacterView({ characterId }: { characterId: string }) {
   async function load() {
     const client = createClient();
     if (!client) return;
-    const [s, st, a, f, sk, m, e, i] = await Promise.all([
+    const [s, st, a, f, sk, m, e, i, n] = await Promise.all([
       client
         .from("character_sheets")
         .select("*")
@@ -100,6 +103,14 @@ export function CharacterView({ characterId }: { characterId: string }) {
         .from("inventory_items")
         .select("*")
         .eq("character_id", characterId),
+      client
+        .from("character_notes")
+        .select("content")
+        .eq("character_id", characterId)
+        .eq("note_type", "player")
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ]);
     if (s.error) {
       toast.error("Você não tem acesso a esta ficha.");
@@ -109,6 +120,7 @@ export function CharacterView({ characterId }: { characterId: string }) {
     setStats((st.data ?? []) as Stat[]);
     setAspect(a.data as Row | null);
     setFlaw(f.data as Row | null);
+    setNotes(n.data?.content ?? "");
     setCollections({
       skills: (sk.data ?? []) as Row[],
       memories: (m.data ?? []) as Row[],
@@ -228,6 +240,7 @@ export function CharacterView({ characterId }: { characterId: string }) {
             <TabsTrigger value="powers">Poderes</TabsTrigger>
             <TabsTrigger value="arsenal">Arsenal</TabsTrigger>
             <TabsTrigger value="story">História</TabsTrigger>
+            <TabsTrigger value="notes">Notas</TabsTrigger>
           </TabsList>
           <TabsContent value="overview">
             <Panel title="Identidade" icon={UserRound}>
@@ -326,6 +339,11 @@ export function CharacterView({ characterId }: { characterId: string }) {
           <TabsContent value="story">
             <Panel title="História" icon={BookOpenText}>
               <Text title="Passado" value={data.backstory} />
+            </Panel>
+          </TabsContent>
+          <TabsContent value="notes">
+            <Panel title="Notas" icon={NotebookPen}>
+              <FormattedNotes content={notes} />
             </Panel>
           </TabsContent>
         </Tabs>

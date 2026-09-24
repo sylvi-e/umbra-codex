@@ -15,6 +15,7 @@ const campaignsPath = new URL("../components/umbra/campaigns.tsx", import.meta.u
 const campaignDeleteMigrationPath = new URL("../supabase/migrations/20260922130000_allow_admin_delete_campaigns.sql", import.meta.url);
 const characterRulesPath = new URL("../lib/character-rules.ts", import.meta.url);
 const coloredTextPath = new URL("../components/umbra/colored-text.tsx", import.meta.url);
+const characterNotesPath = new URL("../components/umbra/character-notes.tsx", import.meta.url);
 const attributeModifierMigrationPath = new URL("../supabase/migrations/20260922013525_enforce_base_attribute_modifier.sql", import.meta.url);
 
 test("todas as tabelas sensíveis ativam RLS", async () => {
@@ -99,6 +100,21 @@ test("textos coloridos usam códigos seguros sem interpretar HTML", async () => 
   assert.match(source, /insertColorCode/);
   assert.match(source, /selected \? "&r"/);
   assert.doesNotMatch(source, /dangerouslySetInnerHTML|innerHTML/);
+});
+
+test("notas podem ser formatadas na edição e visualizadas na ficha", async () => {
+  const editor = await readFile(characterEditorPath, "utf8");
+  const view = await readFile(new URL("../components/umbra/character-view.tsx", import.meta.url), "utf8");
+  const notes = await readFile(characterNotesPath, "utf8");
+
+  assert.match(editor, /value="notes">Notas<\/TabsTrigger>/);
+  assert.match(editor, /from\("character_notes"\)/);
+  assert.match(editor, /CharacterNotesEditor/);
+  assert.match(view, /value="notes">Notas<\/TabsTrigger>/);
+  assert.match(view, /FormattedNotes content=\{notes\}/);
+  assert.match(notes, /Formatar texto/);
+  assert.match(notes, /Negrito|Itálico|Lista numerada/);
+  assert.doesNotMatch(notes, /dangerouslySetInnerHTML|innerHTML/);
 });
 
 test("cargo administrativo não vem do cadastro público", async () => {
