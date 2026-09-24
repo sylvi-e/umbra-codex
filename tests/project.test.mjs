@@ -23,6 +23,7 @@ const portraitMigrationPath = new URL("../supabase/migrations/20260924154000_add
 const attributeModifierMigrationPath = new URL("../supabase/migrations/20260922013525_enforce_base_attribute_modifier.sql", import.meta.url);
 const npcMigrationPath = new URL("../supabase/migrations/20260924210250_add_admin_npcs.sql", import.meta.url);
 const npcReadPolicyMigrationPath = new URL("../supabase/migrations/20260924210300_restrict_npc_sheet_reads.sql", import.meta.url);
+const npcInsertReturningMigrationPath = new URL("../supabase/migrations/20260924210400_fix_npc_insert_returning_rls.sql", import.meta.url);
 
 test("todas as tabelas sensíveis ativam RLS", async () => {
   const sql = await readFile(migrationPath, "utf8");
@@ -354,6 +355,7 @@ test("campos removidos não aparecem na interface da ficha", async () => {
 test("NPCs usam fichas separadas e são exclusivos de administradores", async () => {
   const migration = await readFile(npcMigrationPath, "utf8");
   const readPolicyMigration = await readFile(npcReadPolicyMigrationPath, "utf8");
+  const insertReturningMigration = await readFile(npcInsertReturningMigrationPath, "utf8");
   const shell = await readFile(new URL("../components/umbra/app-shell.tsx", import.meta.url), "utf8");
   const list = await readFile(new URL("../components/umbra/character-list.tsx", import.meta.url), "utf8");
   const editor = await readFile(characterEditorPath, "utf8");
@@ -364,6 +366,8 @@ test("NPCs usam fichas separadas e são exclusivos de administradores", async ()
   assert.match(migration, /not is_npc or private\.is_admin\(\)/);
   assert.match(migration, /security_invoker = true/);
   assert.match(readPolicyMigration, /using \(private\.can_view_character\(id\)\)/);
+  assert.match(insertReturningMigration, /is_npc\s+and private\.is_admin\(\)/);
+  assert.match(insertReturningMigration, /not is_npc/);
   assert.match(shell, /href: "\/npcs", label: "NPCs"/);
   assert.match(shell, /profile\?\.role === "admin"/);
   assert.match(list, /\.eq\("is_npc", isNpc\)/);
