@@ -35,6 +35,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeading } from "@/components/umbra/page-heading";
 import { CharacterArsenalEditor } from "@/components/umbra/character-arsenal-editor";
+import { CharacterSkillsEditor } from "@/components/umbra/character-skills-editor";
 import { useAuth } from "@/components/umbra/auth-provider";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -766,6 +767,7 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
               />
             </Grid>
           </Section>
+          <CharacterSkillsEditor characterId={activeId} />
         </TabsContent>
         <TabsContent value="supernatural">
           <div className="grid gap-6 xl:grid-cols-2">

@@ -5,7 +5,6 @@ import {
   Archive,
   BookOpenText,
   Boxes,
-  Brain,
   Download,
   Dumbbell,
   Ghost as Echo,
@@ -57,14 +56,13 @@ export function CharacterView({ characterId }: { characterId: string }) {
     memories: Row[];
     echoes: Row[];
     items: Row[];
-    traits: Row[];
-  }>({ skills: [], memories: [], echoes: [], items: [], traits: [] });
+  }>({ skills: [], memories: [], echoes: [], items: [] });
   const [arsenalDetail, setArsenalDetail] = useState<{ kind: ArsenalKind; row: Row } | null>(null);
   const [loading, setLoading] = useState(true);
   async function load() {
     const client = createClient();
     if (!client) return;
-    const [s, st, a, f, sk, m, e, i, t] = await Promise.all([
+    const [s, st, a, f, sk, m, e, i] = await Promise.all([
       client
         .from("character_sheets")
         .select("*")
@@ -101,10 +99,6 @@ export function CharacterView({ characterId }: { characterId: string }) {
         .from("inventory_items")
         .select("*")
         .eq("character_id", characterId),
-      client
-        .from("character_traits")
-        .select("*")
-        .eq("character_id", characterId),
     ]);
     if (s.error) {
       toast.error("Você não tem acesso a esta ficha.");
@@ -119,7 +113,6 @@ export function CharacterView({ characterId }: { characterId: string }) {
       memories: (m.data ?? []) as Row[],
       echoes: (e.data ?? []) as Row[],
       items: (i.data ?? []) as Row[],
-      traits: (t.data ?? []) as Row[],
     });
     setLoading(false);
   }
@@ -286,16 +279,18 @@ export function CharacterView({ characterId }: { characterId: string }) {
                 />
                 <Text title="Consequência" value={flaw?.mechanical_effect} />
               </Panel>
-              <Panel title="Atributos sobrenaturais" icon={Brain}>
-                {collections.traits.length ? (
-                  <List rows={collections.traits} />
-                ) : (
-                  <Empty />
-                )}
-              </Panel>
               <Panel title="Habilidades" icon={Swords}>
                 {collections.skills.length ? (
-                  <List rows={collections.skills} />
+                  <ul className="space-y-3">
+                    {collections.skills.map((skill) => (
+                      <li key={String(skill.id)} className="rounded-xl bg-white/[.03] p-3">
+                        <strong className="text-sm">{String(skill.name)}</strong>
+                        {skill.rank_name ? <span className="ml-2 text-xs text-violet-300">{String(skill.rank_name)}</span> : null}
+                        {skill.description ? <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-400">{String(skill.description)}</p> : null}
+                        {skill.effect ? <p className="mt-2 whitespace-pre-wrap text-sm text-zinc-500">Efeito: {String(skill.effect)}</p> : null}
+                      </li>
+                    ))}
+                  </ul>
                 ) : (
                   <Empty />
                 )}

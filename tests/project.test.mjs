@@ -18,12 +18,14 @@ const attributeModifierMigrationPath = new URL("../supabase/migrations/202609220
 
 test("todas as tabelas sensíveis ativam RLS", async () => {
   const sql = await readFile(migrationPath, "utf8");
-  for (const table of ["profiles", "user_roles", "campaigns", "character_sheets", "character_stats", "character_memories", "character_echoes", "inventory_items", "audit_logs"]) {
+  for (const table of ["profiles", "user_roles", "campaigns", "character_sheets", "character_stats", "character_skills", "character_memories", "character_echoes", "inventory_items", "audit_logs"]) {
     assert.match(sql, new RegExp(`['\"]${table}['\"]`));
   }
   assert.match(sql, /enable row level security/i);
   assert.match(sql, /private\.can_view_character/);
   assert.match(sql, /private\.can_edit_character/);
+  assert.match(sql, /'character_skills'[^\n]*create policy %I_write[^\n]*private\.can_edit_character\(character_id\)/);
+  assert.match(sql, /private\.is_admin\(\)/);
 });
 
 test("status de combate usa painel visual sem campos temporariamente ocultos", async () => {
