@@ -285,7 +285,7 @@ export function CharacterView({ characterId }: { characterId: string }) {
                   <ul className="space-y-3">
                     {collections.skills.map((skill) => (
                       <li key={String(skill.id)} className="rounded-xl bg-white/[.03] p-3">
-                        <strong className="text-sm">{String(skill.name)}</strong>
+                        <strong className="text-sm"><ColoredText text={String(skill.name)} /></strong>
                         {skill.rank_name ? <span className="ml-2 text-xs text-violet-300">{String(skill.rank_name)}</span> : null}
                         {skill.description ? <ColoredText text={String(skill.description)} className="mt-2 block text-sm text-zinc-400" /> : null}
                         {skill.effect ? <p className="mt-2 text-sm text-zinc-500">Efeito: <ColoredText text={String(skill.effect)} /></p> : null}

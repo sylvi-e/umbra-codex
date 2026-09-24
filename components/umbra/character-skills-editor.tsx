@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ColoredText, ColoredTextarea } from "@/components/umbra/colored-text";
+import { ColoredInput, ColoredText, ColoredTextarea } from "@/components/umbra/colored-text";
 import { createClient } from "@/lib/supabase/client";
 
 type Skill = {
@@ -110,7 +110,7 @@ export function CharacterSkillsEditor({ characterId }: { characterId?: string })
           {skills.map((skill) => (
             <li key={skill.id} className="flex items-start justify-between gap-3 rounded-xl border border-white/[.07] bg-black/20 p-4">
               <div className="min-w-0">
-                <h3 className="font-medium text-zinc-100">{skill.name}</h3>
+                <h3 className="font-medium text-zinc-100"><ColoredText text={skill.name} /></h3>
                 {[skill.category, skill.rank_name].filter(Boolean).length ? <p className="mt-1 text-xs text-violet-300">{[skill.category, skill.rank_name].filter(Boolean).join(" · ")}</p> : null}
                 {skill.description ? <ColoredText text={skill.description} className="mt-2 block text-sm text-zinc-400" /> : null}
               </div>
@@ -129,7 +129,11 @@ export function CharacterSkillsEditor({ characterId }: { characterId?: string })
             {(["name", "category", "rank_name"] as const).map((field) => (
               <div key={field} className={field === "name" ? "space-y-2 sm:col-span-2" : "space-y-2"}>
                 <Label htmlFor={`skill-${field}`}>{field === "name" ? "Nome *" : field === "category" ? "Categoria" : "Rank"}</Label>
-                <Input id={`skill-${field}`} value={form[field]} onChange={(event) => update(field, event.target.value)} className="border-white/10 bg-black/25" />
+                {field === "name" ? (
+                  <ColoredInput id={`skill-${field}`} value={form[field]} onChange={(value) => update(field, value)} />
+                ) : (
+                  <Input id={`skill-${field}`} value={form[field]} onChange={(event) => update(field, event.target.value)} className="border-white/10 bg-black/25" />
+                )}
               </div>
             ))}
             {(["description", "effect"] as const).map((field) => (

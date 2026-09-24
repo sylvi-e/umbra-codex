@@ -92,6 +92,10 @@ test("textos coloridos usam códigos seguros sem interpretar HTML", async () => 
   assert.match(source, /&\(\[0-9a-fr\]\)/i);
   assert.match(source, /code === "r"/);
   assert.match(source, /minecraftColors/);
+  assert.match(source, /ColorCodeHelp/);
+  assert.match(source, /ColoredInput/);
+  assert.match(source, /Comandos de cores/);
+  assert.doesNotMatch(source, /insertCode|Aplicar \$\{name\}/);
   assert.doesNotMatch(source, /dangerouslySetInnerHTML|innerHTML/);
 });
 

@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export const minecraftColors = [
@@ -36,34 +37,41 @@ export function ColoredText({ text, className = "" }: { text: string; className?
   );
 }
 
-export function ColoredTextarea({ id, value, onChange, rows = 4 }: { id: string; value: string; onChange: (value: string) => void; rows?: number }) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-
-  function insertCode(code: string) {
-    const element = ref.current;
-    const start = element?.selectionStart ?? value.length;
-    const end = element?.selectionEnd ?? value.length;
-    const next = `${value.slice(0, start)}&${code}${value.slice(start, end)}${start !== end ? "&r" : ""}${value.slice(end)}`;
-    onChange(next);
-    requestAnimationFrame(() => {
-      element?.focus();
-      const position = start + 2 + (end - start);
-      element?.setSelectionRange(position, position);
-    });
-  }
-
+export function ColorCodeHelp() {
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-1" aria-label="Cores do texto">
-        {minecraftColors.map(([code, name, color]) => (
-          <Button key={code} type="button" size="icon" variant="outline" className="size-7 border-white/10" onClick={() => insertCode(code)} title={`&${code} — ${name}`} aria-label={`Aplicar ${name}`}>
-            <span className="size-3 rounded-full border border-white/20" style={{ backgroundColor: color }} />
-          </Button>
-        ))}
-        <Button type="button" size="sm" variant="outline" className="h-7 border-white/10 px-2 text-xs" onClick={() => insertCode("r")} title="&r — restaurar cor padrão">&r Normal</Button>
-      </div>
-      <Textarea ref={ref} id={id} rows={rows} value={value} onChange={(event) => onChange(event.target.value)} className="border-white/10 bg-black/20" />
-      <p className="text-xs text-zinc-600">Selecione um trecho e escolha uma cor, ou digite um código como &6.</p>
-    </div>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button type="button" size="icon" variant="outline" className="size-8 shrink-0 border-white/10" aria-label="Ajuda sobre cores" title="Comandos de cores">?</Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90dvh] overflow-y-auto border-white/10 bg-[#100e16] sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Comandos de cores</DialogTitle>
+          <DialogDescription>Digite o código antes do texto. A cor continua até outro código ou até &amp;r.</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-2 py-2 sm:grid-cols-2">
+          {minecraftColors.map(([code, name, color]) => (
+            <div key={code} className="flex items-center gap-3 rounded-lg border border-white/[.07] bg-black/20 px-3 py-2">
+              <span className="size-3 rounded-full border border-white/20" style={{ backgroundColor: color }} />
+              <code className="text-sm text-zinc-200">&amp;{code}</code>
+              <span className="text-sm text-zinc-400">{name}</span>
+            </div>
+          ))}
+          <div className="flex items-center gap-3 rounded-lg border border-white/[.07] bg-black/20 px-3 py-2">
+            <span className="size-3 rounded-full border border-white/20 bg-zinc-300" />
+            <code className="text-sm text-zinc-200">&amp;r</code>
+            <span className="text-sm text-zinc-400">Cor normal</span>
+          </div>
+        </div>
+        <p className="rounded-lg bg-white/[.04] p-3 text-sm text-zinc-400"><code>&amp;6Espada dourada &amp;camaldiçoada&amp;r normal</code></p>
+      </DialogContent>
+    </Dialog>
   );
+}
+
+export function ColoredTextarea({ id, value, onChange, rows = 4 }: { id: string; value: string; onChange: (value: string) => void; rows?: number }) {
+  return <div className="flex items-start gap-2"><Textarea id={id} rows={rows} value={value} onChange={(event) => onChange(event.target.value)} className="border-white/10 bg-black/20" /><ColorCodeHelp /></div>;
+}
+
+export function ColoredInput({ id, value, onChange }: { id: string; value: string; onChange: (value: string) => void }) {
+  return <div className="flex items-center gap-2"><Input id={id} value={value} onChange={(event) => onChange(event.target.value)} className="border-white/10 bg-black/25" /><ColorCodeHelp /></div>;
 }
