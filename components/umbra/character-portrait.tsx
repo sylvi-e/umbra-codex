@@ -60,10 +60,11 @@ export function CharacterPortraitEditor({ characterId, value, onChange }: { char
 }
 
 export function CharacterPortraitThumbnail({ imageUrl, name }: { imageUrl?: string | null; name: string }) {
+  const resolvedUrl = usePortraitUrl(imageUrl ?? "");
   if (!imageUrl) return null;
   return (
-    <div className="mt-4 aspect-[16/9] overflow-hidden rounded-xl border border-white/10 bg-white/[.025]">
-      <Portrait imageUrl={imageUrl} name={`Retrato de ${name}`} />
+    <div className="mt-4 aspect-[16/9] overflow-hidden rounded-xl border border-white/10 bg-[radial-gradient(circle_at_50%_20%,rgba(139,92,246,.22),transparent_58%),rgba(255,255,255,.025)]">
+      {resolvedUrl ? <div role="img" aria-label={`Retrato de ${name}`} className="size-full bg-cover bg-center" style={{ backgroundImage: `url(${JSON.stringify(resolvedUrl)})` }} /> : <div className="grid size-full place-items-center text-zinc-600"><Camera className="size-8" /><span className="sr-only">Carregando retrato</span></div>}
     </div>
   );
 }
