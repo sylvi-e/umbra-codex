@@ -25,7 +25,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeading } from "@/components/umbra/page-heading";
-import { DiceRoller } from "@/components/umbra/dice-roller";
+import { CharacterPortraitCard } from "@/components/umbra/character-portrait";
 import { ColoredText } from "@/components/umbra/colored-text";
 import { FormattedNotes } from "@/components/umbra/character-notes";
 import { createClient } from "@/lib/supabase/client";
@@ -348,7 +348,7 @@ export function CharacterView({ characterId }: { characterId: string }) {
           </TabsContent>
         </Tabs>
         <aside className="space-y-5">
-          <DiceRoller characterId={characterId} />
+          <CharacterPortraitCard imageUrl={String(data.portrait_url ?? "")} name={`Retrato de ${String(data.name)}`} />
           <Panel title="Progressão" icon={Boxes}>
             <InfoGrid
               entries={[

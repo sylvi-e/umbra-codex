@@ -36,6 +36,7 @@ import { PageHeading } from "@/components/umbra/page-heading";
 import { CharacterArsenalEditor } from "@/components/umbra/character-arsenal-editor";
 import { CharacterSkillsEditor } from "@/components/umbra/character-skills-editor";
 import { CharacterNotesEditor } from "@/components/umbra/character-notes";
+import { CharacterPortraitEditor } from "@/components/umbra/character-portrait";
 import { ColoredTextarea } from "@/components/umbra/colored-text";
 import { useAuth } from "@/components/umbra/auth-provider";
 import { createClient } from "@/lib/supabase/client";
@@ -53,6 +54,7 @@ const attribute = z.object({
 });
 const schema = z.object({
   name: z.string().min(2, "O nome precisa ter ao menos 2 caracteres."),
+  portraitUrl: z.string(),
   trueName: z.string(),
   status: z.string(),
   age: z.string(),
@@ -139,6 +141,7 @@ const baseAttributes = [
 ];
 const defaults: FormValues = {
   name: "",
+  portraitUrl: "",
   trueName: "",
   status: "active",
   age: "",
@@ -297,6 +300,7 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
         form.reset({
           ...defaults,
           name: s.name,
+          portraitUrl: s.portrait_url ?? "",
           trueName: s.true_name ?? "",
           status: s.status,
           age: s.age?.toString() ?? "",
@@ -388,6 +392,7 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
       let id = activeId;
       const sheet = {
         name: v.name,
+        portrait_url: v.portraitUrl || null,
         true_name: v.trueName || null,
         status: v.status,
         age: v.age ? Number(v.age) : null,
@@ -598,6 +603,7 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
           <TabsTrigger className="flex-none px-3 sm:px-4" value="notes">Notas</TabsTrigger>
         </TabsList>
         <TabsContent value="identity">
+          <CharacterPortraitEditor characterId={activeId} value={form.watch("portraitUrl")} onChange={(url) => form.setValue("portraitUrl", url, { shouldDirty: true })} />
           <Section
             title="Identidade"
             description="Informações públicas e narrativas do personagem."

@@ -16,6 +16,8 @@ const campaignDeleteMigrationPath = new URL("../supabase/migrations/202609221300
 const characterRulesPath = new URL("../lib/character-rules.ts", import.meta.url);
 const coloredTextPath = new URL("../components/umbra/colored-text.tsx", import.meta.url);
 const characterNotesPath = new URL("../components/umbra/character-notes.tsx", import.meta.url);
+const characterPortraitPath = new URL("../components/umbra/character-portrait.tsx", import.meta.url);
+const portraitMigrationPath = new URL("../supabase/migrations/20260924154000_add_character_portraits_storage.sql", import.meta.url);
 const attributeModifierMigrationPath = new URL("../supabase/migrations/20260922013525_enforce_base_attribute_modifier.sql", import.meta.url);
 
 test("todas as tabelas sensíveis ativam RLS", async () => {
@@ -118,6 +120,25 @@ test("notas podem ser formatadas na edição e visualizadas na ficha", async () 
   assert.match(notes, /Number\(marker\[3\]\) \+ 1/);
   assert.match(notes, /onKeyDown=\{continueList\}/);
   assert.doesNotMatch(notes, /dangerouslySetInnerHTML|innerHTML/);
+});
+
+test("retrato é convertido no frontend e substitui a rolagem na ficha", async () => {
+  const editor = await readFile(characterEditorPath, "utf8");
+  const view = await readFile(new URL("../components/umbra/character-view.tsx", import.meta.url), "utf8");
+  const portrait = await readFile(characterPortraitPath, "utf8");
+  const migration = await readFile(portraitMigrationPath, "utf8");
+
+  assert.match(editor, /CharacterPortraitEditor/);
+  assert.match(editor, /portrait_url: v\.portraitUrl/);
+  assert.match(view, /CharacterPortraitCard/);
+  assert.doesNotMatch(view, /DiceRoller/);
+  assert.match(portrait, /const portraitSize = 512/);
+  assert.match(portrait, /image\/webp/);
+  assert.match(portrait, /targetBytes = 250 \* 1024/);
+  assert.match(portrait, /createImageBitmap/);
+  assert.match(migration, /character-portraits/);
+  assert.match(migration, /private\.can_edit_character/);
+  assert.match(migration, /array\['image\/webp'\]/);
 });
 
 test("cargo administrativo não vem do cadastro público", async () => {
