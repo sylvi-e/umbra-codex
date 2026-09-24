@@ -136,6 +136,11 @@ test("retrato é convertido no frontend e substitui a rolagem na ficha", async (
   assert.match(portrait, /image\/webp/);
   assert.match(portrait, /targetBytes = 250 \* 1024/);
   assert.match(portrait, /createImageBitmap/);
+  assert.match(portrait, /Ajustar retrato/);
+  assert.match(portrait, /Usar este recorte/);
+  assert.match(portrait, /onPointerMove=\{drag\}/);
+  assert.match(portrait, /crop\.offsetX \* portraitSize/);
+  assert.match(portrait, /crop\.offsetY \* portraitSize/);
   assert.match(migration, /character-portraits/);
   assert.match(migration, /private\.can_edit_character/);
   assert.match(migration, /array\['image\/webp'\]/);
