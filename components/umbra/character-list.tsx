@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { PageHeading } from "@/components/umbra/page-heading";
+import { CharacterPortraitThumbnail } from "@/components/umbra/character-portrait";
 import { createClient } from "@/lib/supabase/client";
 import type { CharacterSummary } from "@/lib/types";
 export function CharacterList() {
@@ -140,6 +141,7 @@ export function CharacterList() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
+              <CharacterPortraitThumbnail imageUrl={item.portrait_url} name={item.name} />
               <div className="mt-6 grid grid-cols-3 gap-2 text-center text-xs">
                 <Value label="HP" value={`${item.current_hp}/${item.max_hp}`} />
                 <Value
