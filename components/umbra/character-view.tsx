@@ -27,7 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeading } from "@/components/umbra/page-heading";
 import { CharacterPortraitCard } from "@/components/umbra/character-portrait";
 import { ColoredText } from "@/components/umbra/colored-text";
-import { FormattedNotes } from "@/components/umbra/character-notes";
+import { CharacterNotesBoardView, type BoardNote } from "@/components/umbra/character-notes";
 import { createClient } from "@/lib/supabase/client";
 import { formatAttributeModifier } from "@/lib/character-rules";
 type Row = Record<string, unknown>;
@@ -49,13 +49,12 @@ type Stat = {
   max_value: number | null;
   notes: string | null;
 };
-type NoteRow = { id: string; title: string | null; content: string; z_index: number };
 export function CharacterView({ characterId }: { characterId: string }) {
   const [data, setData] = useState<Row | null>(null);
   const [stats, setStats] = useState<Stat[]>([]);
   const [aspect, setAspect] = useState<Row | null>(null);
   const [flaw, setFlaw] = useState<Row | null>(null);
-  const [notes, setNotes] = useState<NoteRow[]>([]);
+  const [notes, setNotes] = useState<BoardNote[]>([]);
   const [collections, setCollections] = useState<{
     skills: Row[];
     memories: Row[];
@@ -106,9 +105,10 @@ export function CharacterView({ characterId }: { characterId: string }) {
         .eq("character_id", characterId),
       client
         .from("character_notes")
-        .select("id,title,content,z_index")
+        .select("id,title,content,board_x,board_y,board_width,board_height,z_index,is_pinned")
         .eq("character_id", characterId)
         .eq("note_type", "player")
+        .eq("is_pinned", true)
         .order("z_index"),
     ]);
     if (s.error) {
@@ -119,7 +119,7 @@ export function CharacterView({ characterId }: { characterId: string }) {
     setStats((st.data ?? []) as Stat[]);
     setAspect(a.data as Row | null);
     setFlaw(f.data as Row | null);
-    setNotes((n.data ?? []) as NoteRow[]);
+    setNotes((n.data ?? []) as BoardNote[]);
     setCollections({
       skills: (sk.data ?? []) as Row[],
       memories: (m.data ?? []) as Row[],
@@ -342,12 +342,7 @@ export function CharacterView({ characterId }: { characterId: string }) {
           </TabsContent>
           <TabsContent value="notes">
             <Panel title="Notas" icon={NotebookPen}>
-              {notes.length ? <div className="grid gap-4 md:grid-cols-2">
-                {notes.map((note) => <article key={note.id} className="rounded-xl border border-white/[.07] bg-black/20 p-4">
-                  <h3 className="mb-3 font-serif text-lg text-zinc-100">{note.title || "Sem título"}</h3>
-                  <FormattedNotes content={note.content} />
-                </article>)}
-              </div> : <p className="text-sm text-zinc-600">Nenhuma nota registrada.</p>}
+              <CharacterNotesBoardView notes={notes} />
             </Panel>
           </TabsContent>
         </Tabs>

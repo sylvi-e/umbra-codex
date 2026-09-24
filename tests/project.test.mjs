@@ -129,7 +129,11 @@ test("notas podem ser formatadas na edição e visualizadas na ficha", async () 
   assert.match(migration, /board_width integer not null/);
   assert.match(migration, /character_notes_board_horizontal_bounds_check/);
   assert.match(view, /value="notes">Notas<\/TabsTrigger>/);
-  assert.match(view, /FormattedNotes content=\{note\.content\}/);
+  assert.match(view, /CharacterNotesBoardView notes=\{notes\}/);
+  assert.match(view, /\.eq\("is_pinned", true\)/);
+  assert.match(notes, /export function CharacterNotesBoardView/);
+  assert.match(notes, /style=\{noteStyle\(note\)\}/);
+  assert.match(notes, /FormattedNotes content=\{note\.content\}/);
   assert.match(notes, /Formatar texto/);
   assert.match(notes, /Negrito|Itálico|Lista numerada/);
   assert.match(notes, /function continueList/);

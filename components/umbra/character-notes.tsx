@@ -12,7 +12,7 @@ const boardUnits = 1000;
 const minNoteWidth = 180;
 const minNoteHeight = 160;
 
-type BoardNote = {
+export type BoardNote = {
   id: string;
   title: string | null;
   content: string;
@@ -23,6 +23,26 @@ type BoardNote = {
   z_index: number;
   is_pinned: boolean;
 };
+
+export function CharacterNotesBoardView({ notes }: { notes: BoardNote[] }) {
+  if (!notes.length) return <p className="text-sm text-zinc-600">Nenhuma nota fixada.</p>;
+
+  return (
+    <div className="relative min-h-[620px] overflow-hidden rounded-2xl border border-white/[.08] bg-[radial-gradient(circle_at_25%_15%,rgba(124,58,237,.09),transparent_35%),rgba(0,0,0,.18)] sm:min-h-[680px]">
+      {notes.map((note) => (
+        <article key={note.id} className="absolute flex min-w-0 flex-col overflow-hidden rounded-xl border border-violet-300/20 bg-[#18151f] shadow-2xl shadow-black/40" style={noteStyle(note)}>
+          <header className="flex items-center gap-2 border-b border-white/[.07] bg-white/[.035] px-3 py-2">
+            <Pin className="size-4 shrink-0 text-violet-300" />
+            <h3 className="min-w-0 truncate font-serif text-base text-zinc-100">{note.title || "Sem título"}</h3>
+          </header>
+          <div className="min-h-0 flex-1 overflow-auto p-3">
+            <FormattedNotes content={note.content} />
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
 
 type Gesture = {
   kind: "move" | "resize";
