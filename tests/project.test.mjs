@@ -16,6 +16,7 @@ const campaignDeleteMigrationPath = new URL("../supabase/migrations/202609221300
 const characterRulesPath = new URL("../lib/character-rules.ts", import.meta.url);
 const coloredTextPath = new URL("../components/umbra/colored-text.tsx", import.meta.url);
 const characterNotesPath = new URL("../components/umbra/character-notes.tsx", import.meta.url);
+const draggableNotesMigrationPath = new URL("../supabase/migrations/20260924201312_draggable_character_notes.sql", import.meta.url);
 const characterPortraitPath = new URL("../components/umbra/character-portrait.tsx", import.meta.url);
 const portraitMigrationPath = new URL("../supabase/migrations/20260924154000_add_character_portraits_storage.sql", import.meta.url);
 const attributeModifierMigrationPath = new URL("../supabase/migrations/20260922013525_enforce_base_attribute_modifier.sql", import.meta.url);
@@ -108,12 +109,20 @@ test("notas podem ser formatadas na edição e visualizadas na ficha", async () 
   const editor = await readFile(characterEditorPath, "utf8");
   const view = await readFile(new URL("../components/umbra/character-view.tsx", import.meta.url), "utf8");
   const notes = await readFile(characterNotesPath, "utf8");
+  const migration = await readFile(draggableNotesMigrationPath, "utf8");
 
   assert.match(editor, /value="notes">Notas<\/TabsTrigger>/);
-  assert.match(editor, /from\("character_notes"\)/);
-  assert.match(editor, /CharacterNotesEditor/);
+  assert.match(editor, /CharacterNotesBoard/);
+  assert.match(notes, /from\("character_notes"\)/);
+  assert.match(notes, /Criar nota/);
+  assert.match(notes, /Nome da nota/);
+  assert.match(notes, /kind: "move" \| "resize"/);
+  assert.match(notes, /onPointerMove=\{continueGesture\}/);
+  assert.match(migration, /board_x integer not null/);
+  assert.match(migration, /board_width integer not null/);
+  assert.match(migration, /character_notes_board_horizontal_bounds_check/);
   assert.match(view, /value="notes">Notas<\/TabsTrigger>/);
-  assert.match(view, /FormattedNotes content=\{notes\}/);
+  assert.match(view, /FormattedNotes content=\{note\.content\}/);
   assert.match(notes, /Formatar texto/);
   assert.match(notes, /Negrito|Itálico|Lista numerada/);
   assert.match(notes, /function continueList/);

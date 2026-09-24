@@ -49,12 +49,13 @@ type Stat = {
   max_value: number | null;
   notes: string | null;
 };
+type NoteRow = { id: string; title: string | null; content: string; z_index: number };
 export function CharacterView({ characterId }: { characterId: string }) {
   const [data, setData] = useState<Row | null>(null);
   const [stats, setStats] = useState<Stat[]>([]);
   const [aspect, setAspect] = useState<Row | null>(null);
   const [flaw, setFlaw] = useState<Row | null>(null);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState<NoteRow[]>([]);
   const [collections, setCollections] = useState<{
     skills: Row[];
     memories: Row[];
@@ -105,12 +106,10 @@ export function CharacterView({ characterId }: { characterId: string }) {
         .eq("character_id", characterId),
       client
         .from("character_notes")
-        .select("content")
+        .select("id,title,content,z_index")
         .eq("character_id", characterId)
         .eq("note_type", "player")
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
+        .order("z_index"),
     ]);
     if (s.error) {
       toast.error("Você não tem acesso a esta ficha.");
@@ -120,7 +119,7 @@ export function CharacterView({ characterId }: { characterId: string }) {
     setStats((st.data ?? []) as Stat[]);
     setAspect(a.data as Row | null);
     setFlaw(f.data as Row | null);
-    setNotes(n.data?.content ?? "");
+    setNotes((n.data ?? []) as NoteRow[]);
     setCollections({
       skills: (sk.data ?? []) as Row[],
       memories: (m.data ?? []) as Row[],
@@ -343,7 +342,12 @@ export function CharacterView({ characterId }: { characterId: string }) {
           </TabsContent>
           <TabsContent value="notes">
             <Panel title="Notas" icon={NotebookPen}>
-              <FormattedNotes content={notes} />
+              {notes.length ? <div className="grid gap-4 md:grid-cols-2">
+                {notes.map((note) => <article key={note.id} className="rounded-xl border border-white/[.07] bg-black/20 p-4">
+                  <h3 className="mb-3 font-serif text-lg text-zinc-100">{note.title || "Sem título"}</h3>
+                  <FormattedNotes content={note.content} />
+                </article>)}
+              </div> : <p className="text-sm text-zinc-600">Nenhuma nota registrada.</p>}
             </Panel>
           </TabsContent>
         </Tabs>

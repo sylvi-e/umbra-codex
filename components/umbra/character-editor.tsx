@@ -35,7 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeading } from "@/components/umbra/page-heading";
 import { CharacterArsenalEditor } from "@/components/umbra/character-arsenal-editor";
 import { CharacterSkillsEditor } from "@/components/umbra/character-skills-editor";
-import { CharacterNotesEditor } from "@/components/umbra/character-notes";
+import { CharacterNotesBoard } from "@/components/umbra/character-notes";
 import { CharacterPortraitEditor } from "@/components/umbra/character-portrait";
 import { ColoredTextarea } from "@/components/umbra/colored-text";
 import { useAuth } from "@/components/umbra/auth-provider";
@@ -100,7 +100,6 @@ const schema = z.object({
   flawMechanic: z.string(),
   trueNameMeaning: z.string(),
   trueNameEffect: z.string(),
-  notes: z.string(),
 });
 type FormValues = z.infer<typeof schema>;
 type DbStatRow = {
@@ -196,7 +195,6 @@ const defaults: FormValues = {
   flawMechanic: "",
   trueNameMeaning: "",
   trueNameEffect: "",
-  notes: "",
 };
 export function CharacterEditor({ characterId }: { characterId?: string }) {
   const router = useRouter();
@@ -206,7 +204,6 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
   const [rankOptions, setRankOptions] = useState<string[]>([]);
   const [classOptions, setClassOptions] = useState<string[]>([]);
   const [saveState, setSaveState] = useState<SaveState>("idle");
-  const [noteId, setNoteId] = useState<string | null>(null);
   const hydrated = useRef(!characterId);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const form = useForm<FormValues>({
@@ -278,16 +275,8 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
         .select("*")
         .eq("character_id", characterId)
         .maybeSingle(),
-      client
-        .from("character_notes")
-        .select("id,content")
-        .eq("character_id", characterId)
-        .eq("note_type", "player")
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
     ])
-      .then(([sheetResult, statsResult, aspectResult, flawResult, noteResult]) => {
+      .then(([sheetResult, statsResult, aspectResult, flawResult]) => {
         if (sheetResult.error) throw sheetResult.error;
         const s = sheetResult.data;
         const rawStats = (statsResult.data ?? []) as DbStatRow[];
@@ -353,9 +342,7 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
           flawMechanic: flawResult.data?.mechanical_effect ?? "",
           trueNameMeaning: s.true_name_meaning ?? "",
           trueNameEffect: s.true_name_effect ?? "",
-          notes: noteResult.data?.content ?? "",
         });
-        setNoteId(noteResult.data?.id ?? null);
         hydrated.current = true;
       })
       .catch((reason) => {
@@ -441,22 +428,6 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
       }
       if (!id) throw new Error("Não foi possível identificar a ficha salva.");
       const characterKey = id;
-      if (noteId) {
-        const { error: noteError } = await client
-          .from("character_notes")
-          .update({ content: v.notes, title: "Notas" })
-          .eq("id", noteId)
-          .eq("character_id", characterKey);
-        if (noteError) throw noteError;
-      } else if (v.notes.trim()) {
-        const { data: note, error: noteError } = await client
-          .from("character_notes")
-          .insert({ character_id: characterKey, author_id: user.id, title: "Notas", content: v.notes, note_type: "player", visibility: "owner_masters" })
-          .select("id")
-          .single();
-        if (noteError) throw noteError;
-        setNoteId(note.id);
-      }
       const stats = [
         stat(characterKey, "hp", "HP", "resource", v.maxHp, v.currentHp, 0, v.tempHp),
         stat(
@@ -862,7 +833,7 @@ export function CharacterEditor({ characterId }: { characterId?: string }) {
         </TabsContent>
         <TabsContent value="notes">
           <Section title="Notas" description="Anotações do player sobre a ficha e a aventura.">
-            <CharacterNotesEditor value={form.watch("notes")} onChange={(value) => form.setValue("notes", value, { shouldDirty: true })} />
+            {activeId ? <CharacterNotesBoard characterId={activeId} userId={user?.id ?? ""} /> : <p className="text-sm text-amber-300/80">Salve a ficha antes de criar notas avulsas.</p>}
           </Section>
         </TabsContent>
       </Tabs>
