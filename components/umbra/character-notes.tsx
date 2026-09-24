@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Bold, GripHorizontal, Heading2, Italic, List, ListOrdered, LoaderCircle, Plus, Quote, TextCursorInput, Trash2 } from "lucide-react";
+import { Bold, GripHorizontal, Heading2, Italic, List, ListOrdered, LoaderCircle, Pin, PinOff, Plus, Quote, TextCursorInput, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ type BoardNote = {
   board_width: number;
   board_height: number;
   z_index: number;
+  is_pinned: boolean;
 };
 
 type Gesture = {
@@ -53,7 +54,7 @@ export function CharacterNotesBoard({ characterId, userId }: { characterId: stri
     if (!client) return;
     void client
       .from("character_notes")
-      .select("id,title,content,board_x,board_y,board_width,board_height,z_index")
+      .select("id,title,content,board_x,board_y,board_width,board_height,z_index,is_pinned")
       .eq("character_id", characterId)
       .eq("note_type", "player")
       .order("z_index")
@@ -89,8 +90,9 @@ export function CharacterNotesBoard({ characterId, userId }: { characterId: stri
         board_width: 320,
         board_height: 300,
         z_index: zIndex,
+        is_pinned: false,
       })
-      .select("id,title,content,board_x,board_y,board_width,board_height,z_index")
+      .select("id,title,content,board_x,board_y,board_width,board_height,z_index,is_pinned")
       .single();
     setCreating(false);
     if (error) return void toast.error(`Não foi possível criar a nota: ${error.message}`);
@@ -145,6 +147,7 @@ export function CharacterNotesBoard({ characterId, userId }: { characterId: stri
   }
 
   function startGesture(event: React.PointerEvent<HTMLElement>, note: BoardNote, kind: Gesture["kind"]) {
+    if (note.is_pinned) return;
     const board = boardRef.current?.getBoundingClientRect();
     if (!board) return;
     event.preventDefault();
@@ -220,7 +223,7 @@ export function CharacterNotesBoard({ characterId, userId }: { characterId: stri
             }}
           >
             <header
-              className="flex touch-none cursor-grab items-center gap-2 border-b border-white/[.07] bg-white/[.035] px-2 py-1.5 active:cursor-grabbing"
+              className={`flex touch-none items-center gap-2 border-b border-white/[.07] bg-white/[.035] px-2 py-1.5 ${note.is_pinned ? "cursor-default" : "cursor-grab active:cursor-grabbing"}`}
               onPointerDown={(event) => startGesture(event, note, "move")}
               onPointerMove={continueGesture}
               onPointerUp={finishGesture}
@@ -235,31 +238,105 @@ export function CharacterNotesBoard({ characterId, userId }: { characterId: stri
                 placeholder="Nome da nota"
                 aria-label="Nome da nota"
               />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                className={note.is_pinned ? "shrink-0 text-violet-300" : "shrink-0 text-zinc-500 hover:text-violet-300"}
+                onPointerDown={(event) => event.stopPropagation()}
+                onClick={() => patchNote(note.id, { is_pinned: !note.is_pinned }, true)}
+                aria-label={note.is_pinned ? `Desafixar ${note.title || "nota"}` : `Fixar ${note.title || "nota"}`}
+                title={note.is_pinned ? "Desafixar nota" : "Fixar nota"}
+              >
+                {note.is_pinned ? <PinOff /> : <Pin />}
+              </Button>
               <Button type="button" variant="ghost" size="icon-sm" className="shrink-0 text-zinc-500 hover:text-rose-300" onPointerDown={(event) => event.stopPropagation()} onClick={() => void removeNote(note)} aria-label={`Excluir ${note.title || "nota"}`}>
                 <Trash2 />
               </Button>
             </header>
-            <Textarea
-              value={note.content}
-              onChange={(event) => debounceNote(note.id, { content: event.target.value })}
-              className="min-h-0 flex-1 resize-none rounded-none border-0 bg-transparent p-3 leading-6 shadow-none focus-visible:ring-0"
-              placeholder="Escreva sua nota…"
-              aria-label={`Conteúdo de ${note.title || "nota sem título"}`}
-            />
-            <button
-              type="button"
-              className="absolute bottom-0 right-0 size-6 touch-none cursor-nwse-resize border-b-2 border-r-2 border-violet-300/60 bg-transparent"
-              onPointerDown={(event) => startGesture(event, note, "resize")}
-              onPointerMove={continueGesture}
-              onPointerUp={finishGesture}
-              onPointerCancel={finishGesture}
-              aria-label={`Redimensionar ${note.title || "nota"}`}
-            />
+            <BoardNoteBody note={note} onChange={(content) => debounceNote(note.id, { content })} />
+            {!note.is_pinned ? <button
+                type="button"
+                className="absolute bottom-0 right-0 size-6 touch-none cursor-nwse-resize border-b-2 border-r-2 border-violet-300/60 bg-transparent"
+                onPointerDown={(event) => startGesture(event, note, "resize")}
+                onPointerMove={continueGesture}
+                onPointerUp={finishGesture}
+                onPointerCancel={finishGesture}
+                aria-label={`Redimensionar ${note.title || "nota"}`}
+              /> : null}
           </article>
         ))}
       </div>
     </div>
   );
+}
+
+function BoardNoteBody({ note, onChange }: { note: BoardNote; onChange: (content: string) => void }) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function applyFormat(format: Format) {
+    const textarea = textareaRef.current;
+    const value = note.content;
+    const start = textarea?.selectionStart ?? value.length;
+    const end = textarea?.selectionEnd ?? value.length;
+    const selected = value.slice(start, end);
+    const lineStart = value.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+    let replacement = selected;
+    let selectionOffset = 0;
+
+    if (format === "bold" || format === "italic") {
+      const marker = format === "bold" ? "**" : "*";
+      replacement = `${marker}${selected || (format === "bold" ? "texto em negrito" : "texto em itálico")}${marker}`;
+      selectionOffset = marker.length;
+    } else {
+      const prefix = format === "heading" ? "## " : format === "bullet" ? "- " : "> ";
+      const target = value.slice(lineStart, end);
+      replacement = target.split("\n").map((line, index) => `${format === "numbered" ? `${index + 1}. ` : prefix}${line}`).join("\n");
+      onChange(`${value.slice(0, lineStart)}${replacement}${value.slice(end)}`);
+      requestAnimationFrame(() => textarea?.focus());
+      return;
+    }
+
+    onChange(`${value.slice(0, start)}${replacement}${value.slice(end)}`);
+    requestAnimationFrame(() => {
+      textarea?.focus();
+      const nextStart = start + selectionOffset;
+      textarea?.setSelectionRange(nextStart, nextStart + (selected.length || replacement.length - selectionOffset * 2));
+    });
+  }
+
+  function continueList(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) return;
+    const start = event.currentTarget.selectionStart;
+    const end = event.currentTarget.selectionEnd;
+    const lineStart = note.content.lastIndexOf("\n", Math.max(0, start - 1)) + 1;
+    const marker = note.content.slice(lineStart, start).match(/^(\s*)(-\s|([0-9]+)\.\s)/);
+    if (!marker) return;
+    event.preventDefault();
+    const nextMarker = marker[3] ? `${Number(marker[3]) + 1}. ` : "- ";
+    const insertion = `\n${marker[1]}${nextMarker}`;
+    onChange(`${note.content.slice(0, start)}${insertion}${note.content.slice(end)}`);
+    requestAnimationFrame(() => {
+      const nextPosition = start + insertion.length;
+      textareaRef.current?.focus();
+      textareaRef.current?.setSelectionRange(nextPosition, nextPosition);
+    });
+  }
+
+  return <div className="flex min-h-0 flex-1 flex-col">
+    <div className="flex shrink-0 gap-0.5 overflow-x-auto border-b border-white/[.06] bg-black/10 p-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Formatação da nota">
+      {formatActions.map(({ format, label, icon: Icon }) => <Button key={format} type="button" variant="ghost" size="icon-sm" className="shrink-0 text-zinc-400 hover:text-violet-200" onClick={() => applyFormat(format)} title={label} aria-label={label}><Icon /></Button>)}
+    </div>
+    <Textarea
+      ref={textareaRef}
+      value={note.content}
+      onChange={(event) => onChange(event.target.value)}
+      onKeyDown={continueList}
+      className="min-h-0 flex-1 resize-none rounded-none border-0 bg-transparent p-3 leading-6 shadow-none focus-visible:ring-0"
+      placeholder="Escreva sua nota…"
+      aria-label={`Conteúdo de ${note.title || "nota sem título"}`}
+    />
+  </div>;
 }
 
 function noteStyle(note: BoardNote) {
