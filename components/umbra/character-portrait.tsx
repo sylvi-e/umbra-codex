@@ -59,6 +59,15 @@ export function CharacterPortraitEditor({ characterId, value, onChange }: { char
   );
 }
 
+export function CharacterPortraitThumbnail({ imageUrl, name }: { imageUrl?: string | null; name: string }) {
+  if (!imageUrl) return null;
+  return (
+    <div className="mt-4 aspect-[16/9] overflow-hidden rounded-xl border border-white/10 bg-white/[.025]">
+      <Portrait imageUrl={imageUrl} name={`Retrato de ${name}`} />
+    </div>
+  );
+}
+
 export function CharacterPortraitCard({ imageUrl, name }: { imageUrl?: string | null; name: string }) {
   return (
     <section className="grim-card rounded-2xl p-4">
