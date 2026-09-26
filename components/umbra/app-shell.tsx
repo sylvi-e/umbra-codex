@@ -205,7 +205,8 @@ function NavItem({
     <Link
       href={href}
       onClick={onClick}
-      data-active={active}\n      className={`app-nav-item flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm transition-colors ${active ? "bg-violet-500/14 text-violet-100" : "text-zinc-400 hover:bg-white/[.04] hover:text-white"}`}
+      data-active={active}
+      className={`app-nav-item flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm transition-colors ${active ? "bg-violet-500/14 text-violet-100" : "text-zinc-400 hover:bg-white/[.04] hover:text-white"}`}
     >
       <Icon size={19} />
       {label}
