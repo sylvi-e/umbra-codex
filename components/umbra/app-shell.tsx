@@ -64,7 +64,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
       <WebMcpTools />
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-white/[.07] bg-[#0a0910]/95 p-4 backdrop-blur-xl transition-transform lg:sticky lg:top-0 lg:h-screen lg:w-auto ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+        className={`app-sidebar fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-white/[.07] bg-[#0a0910]/95 p-4 backdrop-blur-xl transition-transform lg:sticky lg:top-0 lg:h-screen lg:w-auto ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
         <div className="flex items-center justify-between px-2 py-2">
           <Link href="/dashboard" className="flex items-center gap-3">
@@ -145,7 +145,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
       <div className="min-w-0 pb-20 lg:pb-0">
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/[.06] bg-[#08070c]/80 px-4 backdrop-blur-xl lg:px-8">
+        <header className="app-header sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/[.06] bg-[#08070c]/80 px-4 backdrop-blur-xl lg:px-8">
           <Button
             variant="ghost"
             size="icon"
@@ -171,7 +171,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
       <nav
-        className={`fixed inset-x-3 bottom-3 z-40 grid ${isAdmin ? "grid-cols-5" : "grid-cols-4"} rounded-2xl border border-white/10 bg-[#111018]/95 p-1 shadow-2xl backdrop-blur-xl lg:hidden`}
+        className={`app-mobile-nav fixed inset-x-3 bottom-3 z-40 grid ${isAdmin ? "grid-cols-5" : "grid-cols-4"} rounded-2xl border border-white/10 bg-[#111018]/95 p-1 shadow-2xl backdrop-blur-xl lg:hidden`}
         aria-label="Navegação móvel"
       >
         {visiblePlayerNav.map((item) => (

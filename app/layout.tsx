@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/components/umbra/auth-provider";
 import { PwaRegister } from "@/components/umbra/pwa-register";
+import { ThemeToggle } from "@/components/umbra/theme-toggle";
 import "./globals.css";
 
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -29,6 +30,7 @@ export default function RootLayout({
       <body className={`${geist.variable} ${mono.variable} antialiased`}>
         <AuthProvider>{children}</AuthProvider>
         <PwaRegister />
+        <ThemeToggle />
         <Toaster richColors position="top-right" />
       </body>
     </html>
