@@ -140,41 +140,41 @@ body {
 html[data-theme="gilded"] {
   --background: #07080f;
   --foreground: #e4dece;
-  --card: #181a2c;
+  --card: #10121e;
   --card-foreground: #e4dece;
-  --popover: #141623;
+  --popover: #0e101b;
   --popover-foreground: #e4dece;
   --primary: #c9a84c;
   --primary-foreground: #07080f;
-  --secondary: #141623;
+  --secondary: #10121e;
   --secondary-foreground: #e4dece;
-  --muted: #0e101b;
+  --muted: #0b0d16;
   --muted-foreground: #7a7590;
-  --accent: #252742;
+  --accent: #171923;
   --accent-foreground: #e8c97a;
-  --border: #252742;
-  --input: #252742;
+  --border: #1f2234;
+  --input: #202336;
   --ring: #e8c97a;
   --chart-1: #c9a84c;
   --chart-2: #e8c97a;
   --chart-3: #7a7590;
   --chart-4: #8b6f32;
   --chart-5: #59618a;
-  --sidebar: #0e101b;
+  --sidebar: #090a12;
   --sidebar-foreground: #e4dece;
   --sidebar-primary: #c9a84c;
   --sidebar-primary-foreground: #07080f;
-  --sidebar-accent: #181a2c;
+  --sidebar-accent: #121420;
   --sidebar-accent-foreground: #e8c97a;
-  --sidebar-border: #252742;
+  --sidebar-border: #1f2234;
   --sidebar-ring: #e8c97a;
 }
 
 html[data-theme="gilded"] body {
   background:
     radial-gradient(circle at 82% -10%, rgb(201 168 76 / 18%), transparent 35rem),
-    radial-gradient(circle at -10% 65%, rgb(37 39 66 / 34%), transparent 34rem),
-    linear-gradient(180deg, #0e101b 0%, #07080f 100%);
+    radial-gradient(circle at -10% 65%, rgb(37 39 66 / 18%), transparent 34rem),
+    linear-gradient(180deg, #0a0c14 0%, #07080f 100%);
 }
 
 html[data-theme="gilded"] ::selection {
@@ -183,8 +183,8 @@ html[data-theme="gilded"] ::selection {
 }
 
 html[data-theme="gilded"] .grim-card {
-  border-color: rgb(139 111 50 / 44%);
-  background: linear-gradient(145deg, rgb(24 26 44 / 96%), rgb(14 16 27 / 94%));
+  border-color: rgb(122 117 144 / 20%);
+  background: linear-gradient(145deg, rgb(16 18 30 / 97%), rgb(9 10 17 / 96%));
   box-shadow:
     inset 0 1px 0 rgb(232 201 122 / 7%),
     0 18px 48px rgb(0 0 0 / 24%);
@@ -201,18 +201,18 @@ html[data-theme="gilded"] .scrollbar-thin {
 }
 
 html[data-theme="gilded"] .app-sidebar {
-  border-color: rgb(139 111 50 / 28%);
-  background: rgb(14 16 27 / 96%);
+  border-color: rgb(122 117 144 / 16%);
+  background: rgb(9 10 18 / 97%);
 }
 
 html[data-theme="gilded"] .app-header {
-  border-color: rgb(139 111 50 / 24%);
-  background: rgb(7 8 15 / 84%);
+  border-color: rgb(122 117 144 / 15%);
+  background: rgb(7 8 15 / 90%);
 }
 
 html[data-theme="gilded"] .app-mobile-nav {
-  border-color: rgb(139 111 50 / 34%);
-  background: rgb(24 26 44 / 96%);
+  border-color: rgb(122 117 144 / 24%);
+  background: rgb(12 14 23 / 97%);
 }
 
 html[data-theme="gilded"] .theme-toggle {
@@ -222,7 +222,7 @@ html[data-theme="gilded"] .theme-toggle {
 }
 
 html[data-theme="gilded"] .theme-toggle:hover {
-  background: #181a2c;
+  background: #10121e;
   color: #e8c97a;
 }
 
@@ -262,9 +262,34 @@ html[data-theme="gilded"] [class*="text-zinc-400"] {
 }
 
 html[data-theme="gilded"] [class*="border-white/"] {
-  border-color: rgb(139 111 50 / 32%) !important;
+  border-color: rgb(122 117 144 / 24%) !important;
 }
 
 html[data-theme="gilded"] [class*="bg-white/"] {
-  background-color: rgb(37 39 66 / 48%) !important;
+  background-color: rgb(20 22 35 / 58%) !important;
+}
+
+
+.app-nav-item {
+  border: 1px solid transparent;
+}
+
+.app-nav-item:not([data-active="true"]):hover {
+  border-color: rgb(161 161 170 / 24%);
+}
+
+.app-nav-item[data-active="true"] {
+  border-color: rgb(139 92 246 / 30%);
+}
+
+html[data-theme="gilded"] .app-nav-item:not([data-active="true"]):hover {
+  border-color: rgb(122 117 144 / 42%);
+  background: rgb(16 18 30 / 82%) !important;
+  color: #e4dece !important;
+}
+
+html[data-theme="gilded"] .app-nav-item[data-active="true"] {
+  border-color: rgb(139 111 50 / 56%);
+  background: rgb(139 111 50 / 13%) !important;
+  color: #e8c97a !important;
 }
