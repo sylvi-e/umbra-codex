@@ -146,6 +146,17 @@ export function CharacterView({ characterId, kind = "player" }: { characterId: s
     if (error) toast.error(error.message);
     else void load();
   }
+  async function adjustTemporaryHp(delta: number) {
+    const { error } = await createClient()!.rpc(
+      "adjust_character_temporary_hp",
+      {
+        target_character_id: characterId,
+        amount: delta,
+      },
+    );
+    if (error) toast.error(error.message);
+    else void load();
+  }
   async function openArsenalDetail(kind: ArsenalKind, row: Row) {
     if (kind !== "memories") {
       setArsenalDetail({ kind, row });
@@ -188,6 +199,7 @@ export function CharacterView({ characterId, kind = "player" }: { characterId: s
   if (loading) return <p className="text-zinc-500">Abrindo o registro…</p>;
   if (!data) return <p className="text-rose-300">Ficha indisponível.</p>;
   const hp = byKey.get("hp");
+  const temporaryHp = Math.max(0, hp?.temporary_bonus ?? 0);
   return (
     <>
       <PageHeading
@@ -219,9 +231,11 @@ export function CharacterView({ characterId, kind = "player" }: { characterId: s
           label="Vitalidade"
           current={hp?.current_value ?? 0}
           max={hp?.max_value ?? 0}
-          tone="rose"
+          temporary={temporaryHp}
           onDown={() => adjust("hp", -1)}
           onUp={() => adjust("hp", 1)}
+          onTemporaryDown={() => adjustTemporaryHp(-1)}
+          onTemporaryUp={() => adjustTemporaryHp(1)}
         />
         <div className="grim-card grid grid-cols-3 rounded-2xl p-4">
           <Mini label="CA" value={byKey.get("armor_class")?.base_value ?? 0} />
@@ -405,26 +419,34 @@ function ResourceCard({
   label,
   current,
   max,
-  tone,
+  temporary,
   onDown,
   onUp,
+  onTemporaryDown,
+  onTemporaryUp,
 }: {
   icon: typeof Heart;
   label: string;
   current: number;
   max: number;
-  tone: "rose" | "violet";
+  temporary: number;
   onDown: () => void;
   onUp: () => void;
+  onTemporaryDown: () => void;
+  onTemporaryUp: () => void;
 }) {
+  const displayMax = Math.max(max, current + temporary, 1);
+  const currentPercent = Math.min(100, (current / displayMax) * 100);
+  const temporaryPercent = Math.min(
+    100 - currentPercent,
+    (temporary / displayMax) * 100,
+  );
+
   return (
     <article className="grim-card rounded-2xl p-5">
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-2 text-sm text-zinc-400">
-          <Icon
-            size={17}
-            className={tone === "rose" ? "text-rose-300" : "text-violet-300"}
-          />
+          <Icon size={17} className="text-red-400" />
           {label}
         </span>
         <div className="flex gap-1">
@@ -449,11 +471,55 @@ function ResourceCard({
       <strong className="mt-3 block text-3xl">
         {current}
         <span className="text-lg font-normal text-zinc-600"> / {max}</span>
+        {temporary > 0 ? (
+          <span className="ml-2 text-base font-semibold text-amber-300">
+            +{temporary} temporário
+          </span>
+        ) : null}
       </strong>
-      <Progress
-        value={max ? Math.min(100, (current / max) * 100) : 0}
-        className="mt-3 h-1.5"
-      />
+      <div
+        className="mt-3 flex h-2.5 overflow-hidden rounded-full bg-white/[.06]"
+        role="progressbar"
+        aria-label={`HP atual: ${current} de ${max}. HP temporário: ${temporary}.`}
+        aria-valuemin={0}
+        aria-valuemax={displayMax}
+        aria-valuenow={Math.min(displayMax, current + temporary)}
+      >
+        <div
+          className="h-full bg-gradient-to-r from-red-700 via-red-600 to-red-400 transition-[width] duration-300"
+          style={{ width: `${currentPercent}%` }}
+        />
+        <div
+          className="h-full bg-gradient-to-r from-amber-500 to-yellow-300 shadow-[0_0_12px_rgba(250,204,21,.4)] transition-[width] duration-300"
+          style={{ width: `${temporaryPercent}%` }}
+        />
+      </div>
+      <div className="mt-4 flex items-center justify-between rounded-xl border border-amber-400/15 bg-amber-500/[.05] px-3 py-2">
+        <span className="text-sm text-amber-200">
+          HP temporário: <strong className="tabular-nums">{temporary}</strong>
+        </span>
+        <div className="flex gap-1">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onTemporaryDown}
+            disabled={temporary <= 0}
+            aria-label="Diminuir HP temporário"
+            className="text-amber-200 hover:bg-amber-500/15 hover:text-white"
+          >
+            <Minus />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onTemporaryUp}
+            aria-label="Aumentar HP temporário"
+            className="text-amber-200 hover:bg-amber-500/15 hover:text-white"
+          >
+            <Plus />
+          </Button>
+        </div>
+      </div>
     </article>
   );
 }
