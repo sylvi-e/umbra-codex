@@ -375,3 +375,34 @@ test("NPCs usam fichas separadas e são exclusivos de administradores", async ()
   assert.match(npcPage, /<AdminOnly>/);
   assert.match(npcPage, /<CharacterList kind="npc"/);
 });
+
+
+test("página pública reflete os recursos atuais", async () => {
+  const source = await readFile(new URL("../app/page.tsx", import.meta.url), "utf8");
+  assert.match(source, /Retratos\s+otimizados/);
+  assert.doesNotMatch(source, /Rolagens\s+integradas|Dice5/);
+});
+
+test("migration versionada não contém e-mail administrativo pessoal", async () => {
+  const source = await readFile(
+    new URL("../supabase/migrations/20260921102352_grant_admin_andrelugamer1209.sql", import.meta.url),
+    "utf8",
+  );
+  assert.doesNotMatch(source, /andrelugamer1209@gmail\.com/i);
+  assert.match(source, /provisionado por ambiente/i);
+});
+
+test("CI valida lint, tipos, testes e build", async () => {
+  const workflow = await readFile(new URL("../.github/workflows/ci.yml", import.meta.url), "utf8");
+  assert.match(workflow, /pnpm lint/);
+  assert.match(workflow, /pnpm typecheck/);
+  assert.match(workflow, /pnpm test/);
+  assert.match(workflow, /pnpm build/);
+});
+
+test("service worker não armazena respostas autenticadas", async () => {
+  const source = await readFile(new URL("../public/sw.js", import.meta.url), "utf8");
+  assert.match(source, /request\.mode === "navigate"/);
+  assert.match(source, /_next\/static/);
+  assert.doesNotMatch(source, /(?:dashboard|fichas|campanhas|npcs|perfil).*cache\.put/s);
+});
