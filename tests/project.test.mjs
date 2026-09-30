@@ -85,7 +85,7 @@ test("HP usa barra vermelha com HP temporário amarelo e controles próprios", a
   assert.match(migration, /grant execute.*adjust_character_temporary_hp/s);
 });
 
-test("atributos calculam modificador a cada dois pontos de base", async () => {
+test("atributos exibem valor, modificador calculado e modificador temporário", async () => {
   const source = await readFile(characterEditorPath, "utf8");
   const rules = await readFile(characterRulesPath, "utf8");
   const sql = await readFile(attributeModifierMigrationPath, "utf8");
@@ -96,14 +96,30 @@ test("atributos calculam modificador a cada dois pontos de base", async () => {
 
   assert.match(rules, /normalizedBase <= 0 \? -1 : Math\.floor\(normalizedBase \/ 2\)/);
   assert.match(source, /temporary_bonus: calculateAttributeModifier\(a\.base\)/);
-  assert.match(source, /Base 0 concede −1; Base 1 concede \+0/);
+  assert.match(source, /O Valor 0 concede −1; Valor 1 concede \+0/);
   assert.match(sql, /when new\.base_value <= 0 then -1/);
   assert.match(sql, /else floor\(new\.base_value \/ 2\)/);
   assert.match(sql, /before insert or update/);
   assert.match(sql, /where category = 'base_attribute'/);
-  assert.match(attributesPanel, /<Label>Bônus<\/Label>/);
+  assert.match(attributesPanel, /<Label>Modificador<\/Label>/);
+  assert.match(attributesPanel, /label="Valor"/);
+  assert.match(attributesPanel, /label="Mod\. Temporário"/);
+  assert.match(source, /temporary_modifier: a\.temporaryModifier/);
+  assert.match(source, /temporaryModifier: row\.temporary_modifier \?\? 0/);
   assert.match(attributesPanel, /<Label>Final<\/Label>/);
+  assert.match(attributesPanel, /temporaryModifier/);
   assert.doesNotMatch(attributesPanel, /Penalidade|attributes\.\$\{index\}\.penalty/);
+});
+
+test("migration preserva o modificador temporário ao duplicar uma ficha", async () => {
+  const migration = await readFile(
+    new URL("../supabase/migrations/20260930143243_add_attribute_temporary_modifier.sql", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(migration, /add column if not exists temporary_modifier numeric not null default 0/);
+  assert.match(migration, /security invoker/);
+  assert.match(migration, /temporary_bonus,\s+temporary_modifier, penalty/s);
 });
 
 test("atributos removidos também são excluídos do banco", async () => {
