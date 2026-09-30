@@ -3,12 +3,13 @@ import {
   ArrowRight,
   BookOpenText,
   Castle,
-  Dice5,
   Eye,
+  ImageIcon,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
 const features = [
   {
     icon: BookOpenText,
@@ -26,6 +27,7 @@ const features = [
     text: "Visibilidade por campo e políticas no banco para cada jogador, mestre e administrador.",
   },
 ];
+
 export default function Home() {
   return (
     <main className="relative min-h-screen overflow-hidden">
@@ -90,8 +92,8 @@ export default function Home() {
               banco
             </span>
             <span className="flex items-center gap-2">
-              <Dice5 size={15} className="text-violet-400" /> Rolagens
-              integradas
+              <ImageIcon size={15} className="text-violet-400" /> Retratos
+              otimizados
             </span>
           </div>
         </div>
@@ -130,6 +132,7 @@ export default function Home() {
     </main>
   );
 }
+
 function Status({
   label,
   value,
