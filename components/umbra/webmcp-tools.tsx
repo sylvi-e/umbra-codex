@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 type ToolDefinition = {
   name: string;
@@ -19,6 +20,8 @@ type ModelContext = {
 };
 
 export function WebMcpTools() {
+  const router = useRouter();
+
   useEffect(() => {
     const context = (document as Document & { modelContext?: ModelContext })
       .modelContext;
@@ -43,7 +46,7 @@ export function WebMcpTools() {
           async execute(input) {
             if (!input || typeof input !== "object" || Array.isArray(input))
               throw new Error("Entrada inválida.");
-            window.location.assign("/fichas/nova");
+            router.push("/fichas/nova");
             return { status: "editor_opened" };
           },
         },
@@ -71,7 +74,7 @@ export function WebMcpTools() {
                 : "";
             if (!/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(id))
               throw new Error("Identificador de ficha inválido.");
-            window.location.assign(`/fichas/${id}`);
+            router.push(`/fichas/${id}`);
             return { status: "sheet_opened", characterId: id };
           },
         },
@@ -80,6 +83,7 @@ export function WebMcpTools() {
     ).catch(report);
 
     return () => lifecycle.abort();
-  }, []);
+  }, [router]);
+
   return null;
 }
