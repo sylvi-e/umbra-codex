@@ -1,27 +1,45 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { MoonStar, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type ThemeName = "umbra" | "gilded";
 const storageKey = "umbra-codex-theme";
+const themeChangeEvent = "umbra-theme-change";
+
+function getStoredTheme(): ThemeName {
+  return window.localStorage.getItem(storageKey) === "gilded"
+    ? "gilded"
+    : "umbra";
+}
+
+function subscribeToTheme(onStoreChange: () => void) {
+  const notify = () => onStoreChange();
+  window.addEventListener("storage", notify);
+  window.addEventListener(themeChangeEvent, notify);
+  return () => {
+    window.removeEventListener("storage", notify);
+    window.removeEventListener(themeChangeEvent, notify);
+  };
+}
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<ThemeName>("umbra");
+  const theme = useSyncExternalStore(
+    subscribeToTheme,
+    getStoredTheme,
+    () => "umbra",
+  );
 
   useEffect(() => {
-    const saved = window.localStorage.getItem(storageKey);
-    const initialTheme: ThemeName = saved === "gilded" ? "gilded" : "umbra";
-    document.documentElement.dataset.theme = initialTheme;
-    setTheme(initialTheme);
-  }, []);
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   function toggleTheme() {
     const nextTheme: ThemeName = theme === "gilded" ? "umbra" : "gilded";
-    document.documentElement.dataset.theme = nextTheme;
     window.localStorage.setItem(storageKey, nextTheme);
-    setTheme(nextTheme);
+    document.documentElement.dataset.theme = nextTheme;
+    window.dispatchEvent(new Event(themeChangeEvent));
   }
 
   const gilded = theme === "gilded";
@@ -35,7 +53,9 @@ export function ThemeToggle() {
       title={gilded ? "Usar tema violeta" : "Usar tema dourado"}
     >
       {gilded ? <MoonStar size={17} /> : <Sparkles size={17} />}
-      <span className="hidden sm:inline">{gilded ? "Tema violeta" : "Tema dourado"}</span>
+      <span className="hidden sm:inline">
+        {gilded ? "Tema violeta" : "Tema dourado"}
+      </span>
     </Button>
   );
 }
