@@ -919,10 +919,23 @@ type Path = Parameters<FormApi["register"]>[0];
 function CombatStatus({ form }: { form: FormApi }) {
   const currentHp = Number(form.watch("currentHp")) || 0;
   const maxHp = Number(form.watch("maxHp")) || 0;
-  const hpPercent = maxHp > 0 ? Math.min(100, Math.max(0, (currentHp / maxHp) * 100)) : 0;
+  const temporaryHp = Math.max(0, Number(form.watch("tempHp")) || 0);
+  const displayMax = Math.max(maxHp, currentHp + temporaryHp, 1);
+  const hpPercent = Math.min(100, Math.max(0, (currentHp / displayMax) * 100));
+  const temporaryHpPercent = Math.min(
+    100 - hpPercent,
+    (temporaryHp / displayMax) * 100,
+  );
 
   function adjustHp(amount: number) {
     form.setValue("currentHp", Math.min(Math.max(0, maxHp), Math.max(0, currentHp + amount)), {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  }
+
+  function adjustTemporaryHp(amount: number) {
+    form.setValue("tempHp", Math.max(0, temporaryHp + amount), {
       shouldDirty: true,
       shouldValidate: true,
     });
@@ -953,13 +966,55 @@ function CombatStatus({ form }: { form: FormApi }) {
             </Button>
           </div>
         </div>
-        <div className="relative h-3 overflow-hidden border-y border-white/[.05] bg-black/35" role="progressbar" aria-label="HP atual" aria-valuemin={0} aria-valuemax={maxHp} aria-valuenow={currentHp}>
-          <div className="h-full bg-gradient-to-r from-red-700 via-rose-600 to-red-400 shadow-[0_0_18px_rgba(244,63,94,.55)] transition-[width] duration-300" style={{ width: `${hpPercent}%` }} />
+        <div
+          className="relative flex h-3 overflow-hidden border-y border-white/[.05] bg-black/35"
+          role="progressbar"
+          aria-label={`HP atual: ${currentHp} de ${maxHp}. HP temporário: ${temporaryHp}.`}
+          aria-valuemin={0}
+          aria-valuemax={displayMax}
+          aria-valuenow={Math.min(displayMax, currentHp + temporaryHp)}
+        >
+          <div className="h-full bg-gradient-to-r from-red-700 via-red-600 to-red-400 shadow-[0_0_18px_rgba(239,68,68,.55)] transition-[width] duration-300" style={{ width: `${hpPercent}%` }} />
+          <div className="h-full bg-gradient-to-r from-amber-500 to-yellow-300 shadow-[0_0_14px_rgba(250,204,21,.45)] transition-[width] duration-300" style={{ width: `${temporaryHpPercent}%` }} />
         </div>
         <div className="grid gap-3 p-4 sm:grid-cols-3 sm:p-5">
           <CombatInput form={form} name="currentHp" label="HP atual" tone="rose" />
           <CombatInput form={form} name="maxHp" label="HP máximo" tone="rose" />
-          <CombatInput form={form} name="tempHp" label="HP temporário" tone="amber" />
+          <div className="rounded-xl border border-amber-400/20 bg-amber-500/[.07] p-3 text-amber-300">
+            <span className="block text-xs font-semibold uppercase tracking-wider">
+              HP temporário
+            </span>
+            <div className="mt-2 flex items-center gap-2">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                onClick={() => adjustTemporaryHp(-1)}
+                disabled={temporaryHp <= 0}
+                aria-label="Diminuir HP temporário em 1"
+                className="text-amber-200 hover:bg-amber-500/15 hover:text-white"
+              >
+                <Minus />
+              </Button>
+              <Input
+                type="number"
+                min={0}
+                aria-label="HP temporário"
+                className="h-auto min-w-0 border-0 bg-transparent p-0 text-center text-xl font-bold tabular-nums text-white shadow-none focus-visible:ring-0"
+                {...form.register("tempHp")}
+              />
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                onClick={() => adjustTemporaryHp(1)}
+                aria-label="Aumentar HP temporário em 1"
+                className="text-amber-200 hover:bg-amber-500/15 hover:text-white"
+              >
+                <Plus />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
