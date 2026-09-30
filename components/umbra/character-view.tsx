@@ -44,6 +44,7 @@ type Stat = {
   category: string;
   base_value: number;
   temporary_bonus: number;
+  temporary_modifier: number;
   penalty: number;
   current_value: number | null;
   max_value: number | null;
@@ -281,10 +282,10 @@ export function CharacterView({ characterId, kind = "player" }: { characterId: s
                     >
                       <span className="text-sm text-zinc-500">{s.label}</span>
                       <strong className="mt-2 block text-3xl">
-                        {formatAttributeModifier(s.temporary_bonus)}
+                        {formatAttributeModifier(s.temporary_bonus + (s.temporary_modifier ?? 0))}
                       </strong>
                       <span className="text-xs text-zinc-600">
-                        Base {s.base_value} · Modificador {formatAttributeModifier(s.temporary_bonus)}
+                        Valor {s.base_value} · Modificador {formatAttributeModifier(s.temporary_bonus)} · Mod. Temporário {formatAttributeModifier(s.temporary_modifier ?? 0)}
                       </span>
                     </div>
                   ))}
