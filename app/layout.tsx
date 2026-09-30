@@ -8,15 +8,32 @@ import "./globals.css";
 
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const description =
+  "Grimório digital para fichas, campanhas e regras de RPG de fantasia sombria.";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://umbra-codex.vercel.app"),
   title: { default: "Umbra Codex", template: "%s · Umbra Codex" },
-  description:
-    "Grimório digital para fichas, campanhas e regras de RPG de fantasia sombria.",
+  description,
   applicationName: "Umbra Codex",
+  authors: [{ name: "Umbra Codex" }],
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
   manifest: "/manifest.webmanifest",
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    url: "/",
+    siteName: "Umbra Codex",
+    title: "Umbra Codex",
+    description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Umbra Codex",
+    description,
+  },
 };
+
 export const viewport: Viewport = {
   themeColor: "#09080e",
   colorScheme: "dark",
