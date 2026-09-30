@@ -24,6 +24,7 @@ const attributeModifierMigrationPath = new URL("../supabase/migrations/202609220
 const npcMigrationPath = new URL("../supabase/migrations/20260924210250_add_admin_npcs.sql", import.meta.url);
 const npcReadPolicyMigrationPath = new URL("../supabase/migrations/20260924210300_restrict_npc_sheet_reads.sql", import.meta.url);
 const npcInsertReturningMigrationPath = new URL("../supabase/migrations/20260924210400_fix_npc_insert_returning_rls.sql", import.meta.url);
+const temporaryHpMigrationPath = new URL("../supabase/migrations/20260930111500_adjust_temporary_hp.sql", import.meta.url);
 
 test("todas as tabelas sensíveis ativam RLS", async () => {
   const sql = await readFile(migrationPath, "utf8");
@@ -58,6 +59,29 @@ test("status de combate usa painel visual sem campos temporariamente ocultos", a
     /Esquiva|Redução de dano|Essência atual|Essência máxima/,
   );
   assert.doesNotMatch(view, /label="Essência"/);
+});
+
+test("HP usa barra vermelha com HP temporário amarelo e controles próprios", async () => {
+  const editor = await readFile(characterEditorPath, "utf8");
+  const view = await readFile(
+    new URL("../components/umbra/character-view.tsx", import.meta.url),
+    "utf8",
+  );
+  const migration = await readFile(temporaryHpMigrationPath, "utf8");
+
+  for (const source of [editor, view]) {
+    assert.match(source, /from-red-700 via-red-600 to-red-400/);
+    assert.match(source, /from-amber-500 to-yellow-300/);
+    assert.match(source, /Diminuir HP temporário/);
+    assert.match(source, /Aumentar HP temporário/);
+  }
+
+  assert.match(view, /adjust_character_temporary_hp/);
+  assert.match(view, /temporary_bonus/);
+  assert.match(migration, /private\.can_edit_character\(target_character_id\)/);
+  assert.match(migration, /temporary_bonus = greatest\(0/);
+  assert.match(migration, /for update/);
+  assert.match(migration, /grant execute.*adjust_character_temporary_hp/s);
 });
 
 test("atributos calculam modificador a cada dois pontos de base", async () => {
