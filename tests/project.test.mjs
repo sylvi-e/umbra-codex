@@ -81,6 +81,7 @@ test("HP usa barra vermelha com HP temporário amarelo e controles próprios", a
   assert.match(migration, /private\.can_edit_character\(target_character_id\)/);
   assert.match(migration, /temporary_bonus = greatest\(0/);
   assert.match(migration, /for update/);
+  assert.match(migration, /from public, anon/);
   assert.match(migration, /grant execute.*adjust_character_temporary_hp/s);
 });
 
