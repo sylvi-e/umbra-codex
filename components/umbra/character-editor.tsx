@@ -50,6 +50,7 @@ const attribute = z.object({
   key: z.string(),
   label: z.string(),
   base: numeric,
+  temporaryModifier: numeric,
   notes: z.string(),
 });
 const schema = z.object({
@@ -108,6 +109,7 @@ type DbStatRow = {
   category: string;
   base_value: number;
   temporary_bonus: number;
+  temporary_modifier: number;
   penalty: number;
   current_value: number | null;
   max_value: number | null;
@@ -185,6 +187,7 @@ const defaults: FormValues = {
       .replace(/\s/g, "_"),
     label,
     base: 0,
+    temporaryModifier: 0,
     notes: "",
   })),
   aspectName: "",
@@ -337,6 +340,7 @@ export function CharacterEditor({ characterId, kind = "player" }: { characterId?
                 key: row.stat_key,
                 label: row.label,
                 base: row.base_value,
+                temporaryModifier: row.temporary_modifier ?? 0,
                 notes: row.notes ?? "",
               }))
             : defaults.attributes,
@@ -481,6 +485,7 @@ export function CharacterEditor({ characterId, kind = "player" }: { characterId?
           category: "base_attribute",
           base_value: a.base,
           temporary_bonus: calculateAttributeModifier(a.base),
+          temporary_modifier: a.temporaryModifier,
           penalty: 0,
           current_value: null,
           max_value: null,
@@ -648,13 +653,13 @@ export function CharacterEditor({ characterId, kind = "player" }: { characterId?
         <TabsContent value="attributes">
           <Section
             title="Atributos base"
-            description="A Base 0 concede −1; Base 1 concede +0. A partir da Base 2, cada 2 pontos concedem +1."
+            description="O Valor 0 concede −1; Valor 1 concede +0. A partir do Valor 2, cada 2 pontos concedem +1."
           >
             <div className="space-y-3">
               {fields.map((item, index) => (
                 <div
                   key={item.id}
-                  className="grid gap-3 rounded-2xl border border-white/[.06] bg-white/[.02] p-4 md:grid-cols-[1.2fr_repeat(3,.7fr)_auto]"
+                  className="grid gap-3 rounded-2xl border border-white/[.06] bg-white/[.02] p-4 md:grid-cols-[1.2fr_repeat(4,.7fr)_auto]"
                 >
                   <Field
                     form={form}
@@ -664,11 +669,11 @@ export function CharacterEditor({ characterId, kind = "player" }: { characterId?
                   <Field
                     form={form}
                     name={`attributes.${index}.base`}
-                    label="Base"
+                    label="Valor"
                     type="number"
                   />
                   <div>
-                    <Label>Bônus</Label>
+                    <Label>Modificador</Label>
                     <output className="mt-2 block h-10 rounded-md border border-violet-400/20 bg-violet-500/[.07] px-3 py-2 font-semibold text-violet-200">
                       {formatAttributeModifier(
                         calculateAttributeModifier(
@@ -677,13 +682,19 @@ export function CharacterEditor({ characterId, kind = "player" }: { characterId?
                       )}
                     </output>
                   </div>
+                  <Field
+                    form={form}
+                    name={`attributes.${index}.temporaryModifier`}
+                    label="Mod. Temporário"
+                    type="number"
+                  />
                   <div>
                     <Label>Final</Label>
                     <output className="mt-2 block h-10 rounded-md border border-white/10 bg-black/20 px-3 py-2 font-semibold">
                       {formatAttributeModifier(
                         calculateAttributeModifier(
                           Number(form.watch(`attributes.${index}.base`)),
-                        ),
+                        ) + Number(form.watch(`attributes.${index}.temporaryModifier`)),
                       )}
                     </output>
                   </div>
@@ -709,6 +720,7 @@ export function CharacterEditor({ characterId, kind = "player" }: { characterId?
                   key: `custom_${Date.now()}`,
                   label: "Novo atributo",
                   base: 0,
+                  temporaryModifier: 0,
                   notes: "",
                 })
               }
@@ -863,6 +875,7 @@ function stat(
     category,
     base_value,
     temporary_bonus,
+    temporary_modifier: 0,
     penalty: 0,
     current_value,
     max_value,
