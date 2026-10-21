@@ -1,0 +1,47 @@
+name: Supabase availability
+on:
+  schedule:
+    - cron: '23 */8 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/supabase-availability.yml'
+
+permissions: {}
+
+concurrency:
+  group: supabase-availability
+  cancel-in-progress: false
+
+jobs:
+  check-database:
+    name: Check ${{ matrix.project.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - name: Umbra Codex
+            ref: myvtiqjetnkjafszlsld
+            key: sb_publishable_g6kMJ2G2AZUaqktKzUEqrA_0euLZQsK
+          - name: Sylvie Lista
+            ref: cmnsbskiolnyveirezsd
+            key: sb_publishable_-ej1Zkqdf5vfHyZ0vhn4MQ_HskMDCOq
+    steps:
+      # Publishable keys are public client configuration, never service-role keys.
+      # HEAD executes a read through PostgREST under existing RLS without returning rows.
+      - name: Query database without returning personal data
+        env:
+          PROJECT_REF: ${{ matrix.project.ref }}
+          PUBLISHABLE_KEY: ${{ matrix.project.key }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --silent --show-error --fail --head \
+            --connect-timeout 15 --max-time 45 \
+            --retry 3 --retry-delay 5 --retry-max-time 180 \
+            --output /dev/null --write-out 'Database response: HTTP %{http_code}\n' \
+            --header "apikey: ${PUBLISHABLE_KEY}" \
+            "https://${PROJECT_REF}.supabase.co/rest/v1/profiles?select=*&limit=1"
