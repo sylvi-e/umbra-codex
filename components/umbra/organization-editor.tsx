@@ -270,21 +270,16 @@ export function OrganizationEditor({
                     onChange={(v) => setAge(String(v))}
                   />
                   <Text
-                    label="Raça"
-                    value={sheet.race}
-                    onChange={(v) => update("race", v)}
-                  />
-                  <Text
                     label="Altura"
                     value={sheet.height}
                     onChange={(v) => update("height", v)}
                   />
+                  <Text
+                    label="Raça"
+                    value={sheet.race}
+                    onChange={(v) => update("race", v)}
+                  />
                 </div>
-                <LongText
-                  label="Anotações do personagem"
-                  value={sheet.notes}
-                  onChange={(v) => update("notes", v)}
-                />
               </SheetSection>
             </TabsContent>
             <TabsContent value="combat">
