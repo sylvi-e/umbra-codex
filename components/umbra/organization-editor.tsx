@@ -351,6 +351,11 @@ export function OrganizationEditor({
                     value={sheet.race}
                     onChange={(v) => update("race", v)}
                   />
+                  <NumberField
+                    label="Dinheiro"
+                    value={sheet.money}
+                    onChange={(v) => update("money", v)}
+                  />
                 </div>
               </SheetSection>
             </TabsContent>
@@ -409,11 +414,6 @@ export function OrganizationEditor({
                     min={50}
                     max={100}
                     onChange={(v) => update("percentage", v)}
-                  />
-                  <NumberField
-                    label="Dinheiro"
-                    value={sheet.money}
-                    onChange={(v) => update("money", v)}
                   />
                 </div>
               </SheetSection>
