@@ -12,7 +12,35 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Save, LoaderCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+const inventoryLocations = [
+  ["carregado", "Carregado"],
+  ["bau", "Baú"],
+  ["mochila", "Mochila"],
+  ["equipado", "Equipado"],
+  ["cinto", "Cinto de poções"],
+] as const;
+function inventoryCategory(location: string) {
+  return inventoryLocations.some(([key]) => key === location)
+    ? location
+    : "outros";
+}
+import {
+  Plus,
+  Trash2,
+  Save,
+  LoaderCircle,
+  Package,
+  ChevronRight,
+} from "lucide-react";
 import {
   ColoredInput,
   ColoredTextarea,
@@ -64,6 +92,8 @@ export function OrganizationEditor({
   const [loading, setLoading] = useState(Boolean(characterId));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [inventoryLocation, setInventoryLocation] = useState("carregado");
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
   const [combatState, setCombatState] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
@@ -538,137 +568,255 @@ export function OrganizationEditor({
                   pequenos ou isentos.
                 </p>
               </div>
-              {sheet.items.map((item) => (
-                <section
-                  key={item.id}
-                  className="grim-card rounded-2xl p-5 space-y-3"
+              <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
+                <nav
+                  aria-label="Locais do inventário"
+                  className="grim-card flex flex-wrap content-start gap-2 rounded-2xl p-3 lg:flex-col"
                 >
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <Text
-                      label="Item / artefato"
-                      value={item.name}
-                      onChange={(v) =>
-                        update(
-                          "items",
-                          sheet.items.map((i) =>
-                            i.id === item.id ? { ...i, name: v } : i,
-                          ),
-                        )
-                      }
-                    />
-                    <label className="space-y-2">
-                      <span>Localização</span>
-                      <select
-                        disabled={readOnly}
-                        className="h-10 w-full rounded-md border bg-background px-3"
-                        value={item.location}
-                        onChange={(e) =>
-                          update(
-                            "items",
-                            sheet.items.map((i) =>
-                              i.id === item.id
-                                ? { ...i, location: e.target.value }
-                                : i,
-                            ),
-                          )
+                  {[
+                    ...inventoryLocations,
+                    ...(sheet.items.some(
+                      (item) => inventoryCategory(item.location) === "outros",
+                    )
+                      ? [["outros", "Outros locais"]]
+                      : []),
+                  ].map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={inventoryLocation === key}
+                      onClick={() => setInventoryLocation(key)}
+                      className={`flex min-h-11 items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors ${inventoryLocation === key ? "bg-violet-500/15 text-violet-200" : "text-zinc-400 hover:bg-white/[.04] hover:text-white"}`}
+                    >
+                      <span>{label}</span>
+                      <span className="rounded-md bg-white/[.05] px-2 py-0.5 text-xs">
+                        {
+                          sheet.items.filter(
+                            (item) => inventoryCategory(item.location) === key,
+                          ).length
+                        }
+                      </span>
+                    </button>
+                  ))}
+                </nav>
+                <section className="grim-card min-w-0 rounded-2xl p-4 sm:p-5">
+                  <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h2 className="font-serif text-2xl">
+                        {inventoryLocations.find(
+                          ([key]) => key === inventoryLocation,
+                        )?.[1] ?? "Outros locais"}
+                      </h2>
+                      <p className="mt-1 text-sm text-zinc-500">
+                        Clique em um item para abrir os detalhes.
+                      </p>
+                    </div>
+                    {!readOnly && (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const itemId = crypto.randomUUID();
+                          update("items", [
+                            ...sheet.items,
+                            {
+                              id: itemId,
+                              name: "",
+                              quantity: 1,
+                              slots: 1,
+                              location:
+                                inventoryLocation === "outros"
+                                  ? "carregado"
+                                  : inventoryLocation,
+                              description: "",
+                              effect: "",
+                              drawback: "",
+                            },
+                          ]);
+                          setSelectedItem(itemId);
+                        }}
+                      >
+                        <Plus />
+                        Adicionar item ou artefato
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {sheet.items.map((item) => (
+                      <Dialog
+                        key={item.id}
+                        open={selectedItem === item.id}
+                        onOpenChange={(open) =>
+                          setSelectedItem(open ? item.id : null)
                         }
                       >
-                        {[
-                          ["carregado", "Carregado"],
-                          ["equipado", "Equipado"],
-                          ["mochila", "Mochila"],
-                          ["cinto", "Cinto de poções"],
-                          ["bau", "Baú"],
-                        ].map(([v, l]) => (
-                          <option key={v} value={v}>
-                            {l}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <NumberField
-                      label="Quantidade"
-                      min={1}
-                      value={item.quantity}
-                      onChange={(v) =>
-                        update(
-                          "items",
-                          sheet.items.map((i) =>
-                            i.id === item.id ? { ...i, quantity: v } : i,
-                          ),
-                        )
-                      }
-                    />
-                    <NumberField
-                      label="Espaços totais ocupados"
-                      value={item.slots}
-                      onChange={(v) =>
-                        update(
-                          "items",
-                          sheet.items.map((i) =>
-                            i.id === item.id ? { ...i, slots: v } : i,
-                          ),
-                        )
-                      }
-                    />
+                        {inventoryCategory(item.location) ===
+                          inventoryLocation && (
+                          <DialogTrigger asChild>
+                            <button
+                              type="button"
+                              className="flex w-full items-center gap-3 rounded-xl border border-white/[.07] bg-white/[.02] p-4 text-left transition-colors hover:border-violet-400/30 hover:bg-violet-500/[.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                            >
+                              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-500/10 text-violet-300">
+                                <Package size={19} />
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <ColoredText
+                                  text={item.name || "Item sem nome"}
+                                  className="block break-words font-medium"
+                                />
+                                <span className="mt-1 block text-xs text-zinc-500">
+                                  Quantidade: {item.quantity} · {item.slots}{" "}
+                                  {item.slots === 1 ? "espaço" : "espaços"}
+                                  {["equipado", "bau"].includes(item.location)
+                                    ? " · não ocupa capacidade carregada"
+                                    : ""}
+                                </span>
+                              </span>
+                              <ChevronRight
+                                className="shrink-0 text-zinc-500"
+                                size={18}
+                              />
+                            </button>
+                          </DialogTrigger>
+                        )}
+                        <DialogContent className="max-h-[90dvh] overflow-y-auto border-white/10 bg-[#100e16] sm:max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle className="font-serif text-2xl">
+                              <ColoredText
+                                text={item.name || "Novo item ou artefato"}
+                              />
+                            </DialogTitle>
+                            <DialogDescription>
+                              {readOnly
+                                ? "Informações do item e local de armazenamento."
+                                : "Edite o item e escolha onde ele fica guardado. Salve a ficha para confirmar suas alterações."}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="grid gap-3 sm:grid-cols-2">
+                              <Text
+                                label="Item / artefato"
+                                value={item.name}
+                                onChange={(v) =>
+                                  update(
+                                    "items",
+                                    sheet.items.map((i) =>
+                                      i.id === item.id ? { ...i, name: v } : i,
+                                    ),
+                                  )
+                                }
+                              />
+                              <label className="space-y-2">
+                                <span>Localização</span>
+                                <select
+                                  disabled={readOnly}
+                                  className="h-10 w-full rounded-md border bg-background px-3"
+                                  value={item.location}
+                                  onChange={(e) =>
+                                    update(
+                                      "items",
+                                      sheet.items.map((i) =>
+                                        i.id === item.id
+                                          ? { ...i, location: e.target.value }
+                                          : i,
+                                      ),
+                                    )
+                                  }
+                                >
+                                  {inventoryLocations.map(([v, l]) => (
+                                    <option key={v} value={v}>
+                                      {l}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <NumberField
+                                label="Quantidade"
+                                min={1}
+                                value={item.quantity}
+                                onChange={(v) =>
+                                  update(
+                                    "items",
+                                    sheet.items.map((i) =>
+                                      i.id === item.id
+                                        ? { ...i, quantity: v }
+                                        : i,
+                                    ),
+                                  )
+                                }
+                              />
+                              <NumberField
+                                label="Espaços totais ocupados"
+                                value={item.slots}
+                                onChange={(v) =>
+                                  update(
+                                    "items",
+                                    sheet.items.map((i) =>
+                                      i.id === item.id ? { ...i, slots: v } : i,
+                                    ),
+                                  )
+                                }
+                              />
+                            </div>
+                            {(
+                              [
+                                ["description", "Descrição"],
+                                ["effect", "Efeito / encantamentos"],
+                                ["drawback", "Malefício"],
+                              ] as const
+                            ).map(([key, label]) => (
+                              <LongText
+                                key={key}
+                                label={label}
+                                value={item[key]}
+                                onChange={(v) =>
+                                  update(
+                                    "items",
+                                    sheet.items.map((i) =>
+                                      i.id === item.id ? { ...i, [key]: v } : i,
+                                    ),
+                                  )
+                                }
+                              />
+                            ))}
+                            {!readOnly && (
+                              <Button
+                                variant="outline"
+                                onClick={() =>
+                                  update(
+                                    "items",
+                                    sheet.items.filter((i) => i.id !== item.id),
+                                  )
+                                }
+                              >
+                                Remover item
+                              </Button>
+                            )}
+                          </div>
+                          <DialogFooter>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setSelectedItem(null)}
+                            >
+                              {readOnly ? "Fechar" : "Concluir"}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    ))}
+                    {!sheet.items.some(
+                      (item) =>
+                        inventoryCategory(item.location) === inventoryLocation,
+                    ) && (
+                      <div className="rounded-xl border border-dashed border-white/10 px-5 py-10 text-center text-sm text-zinc-500">
+                        <Package className="mx-auto mb-3 text-violet-300" />
+                        Nenhum item neste local.
+                      </div>
+                    )}
                   </div>
-                  {(
-                    [
-                      ["description", "Descrição"],
-                      ["effect", "Efeito / encantamentos"],
-                      ["drawback", "Malefício"],
-                    ] as const
-                  ).map(([key, label]) => (
-                    <LongText
-                      key={key}
-                      label={label}
-                      value={item[key]}
-                      onChange={(v) =>
-                        update(
-                          "items",
-                          sheet.items.map((i) =>
-                            i.id === item.id ? { ...i, [key]: v } : i,
-                          ),
-                        )
-                      }
-                    />
-                  ))}
-                  {!readOnly && (
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        update(
-                          "items",
-                          sheet.items.filter((i) => i.id !== item.id),
-                        )
-                      }
-                    >
-                      Remover item
-                    </Button>
-                  )}
                 </section>
-              ))}
-              {!readOnly && (
-                <Button
-                  onClick={() =>
-                    update("items", [
-                      ...sheet.items,
-                      {
-                        id: crypto.randomUUID(),
-                        name: "",
-                        quantity: 1,
-                        slots: 1,
-                        location: "carregado",
-                        description: "",
-                        effect: "",
-                        drawback: "",
-                      },
-                    ])
-                  }
-                >
-                  Adicionar item ou artefato
-                </Button>
-              )}
+              </div>
             </TabsContent>
             <TabsContent value="abilities" className="space-y-4">
               {sheet.abilities.map((ability) => (
