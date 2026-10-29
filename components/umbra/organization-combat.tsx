@@ -239,9 +239,6 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
           description={`Redução de dano físico · ${sheet.armor} base + ${sheet.armorBonus} equipamentos`}
           icon={Shield}
           tone="border-sky-400/20 bg-sky-500/[.07] text-sky-300"
-          onAdjust={(delta) =>
-            update("armor", Math.max(0, sheet.armor + delta))
-          }
           total={sheet.armor + sheet.armorBonus}
         >
           <ResourceInput
@@ -262,7 +259,6 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
           description={`Redução de dano mágico · ${sheet.mr} base + ${sheet.mrBonus} equipamentos`}
           icon={ShieldCheck}
           tone="border-violet-400/20 bg-violet-500/[.07] text-violet-300"
-          onAdjust={(delta) => update("mr", Math.max(0, sheet.mr + delta))}
           total={sheet.mr + sheet.mrBonus}
         >
           <ResourceInput
@@ -289,6 +285,7 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
           total={totals.movement}
         >
           <ResourceInput
+            showStepper={false}
             label="Base em metros"
             tone="emerald"
             value={sheet.movementBase}
@@ -304,11 +301,13 @@ function ResourceInput({
   value,
   onChange,
   tone = "rose",
+  showStepper = true,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   tone?: "rose" | "violet" | "blue" | "emerald";
+  showStepper?: boolean;
 }) {
   return (
     <div
@@ -318,16 +317,18 @@ function ResourceInput({
         {label}
       </span>
       <div className="mt-2 flex items-center gap-2">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={`Diminuir ${label} em 1`}
-          disabled={value <= 0}
-          onClick={() => onChange(Math.max(0, value - 1))}
-        >
-          <Minus />
-        </Button>
+        {showStepper && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={`Diminuir ${label} em 1`}
+            disabled={value <= 0}
+            onClick={() => onChange(Math.max(0, value - 1))}
+          >
+            <Minus />
+          </Button>
+        )}
         <Input
           aria-label={label}
           type="number"
@@ -336,15 +337,17 @@ function ResourceInput({
           value={value}
           onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
         />
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={`Aumentar ${label} em 1`}
-          onClick={() => onChange(value + 1)}
-        >
-          <Plus />
-        </Button>
+        {showStepper && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={`Aumentar ${label} em 1`}
+            onClick={() => onChange(value + 1)}
+          >
+            <Plus />
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -363,7 +366,7 @@ function Metric({
   icon: typeof Shield;
   tone: string;
   total: number;
-  onAdjust: (delta: number) => void;
+  onAdjust?: (delta: number) => void;
   children: React.ReactNode;
 }) {
   return (
@@ -380,27 +383,31 @@ function Metric({
         <Icon size={18} />
       </div>
       <div className="my-4 flex items-center justify-center gap-3">
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          aria-label={`Diminuir ${label} em 1`}
-          onClick={() => onAdjust(-1)}
-        >
-          <Minus />
-        </Button>
+        {onAdjust && (
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label={`Diminuir ${label} em 1`}
+            onClick={() => onAdjust(-1)}
+          >
+            <Minus />
+          </Button>
+        )}
         <output className="min-w-20 text-center text-3xl font-bold tabular-nums text-white">
           {total}
         </output>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          aria-label={`Aumentar ${label} em 1`}
-          onClick={() => onAdjust(1)}
-        >
-          <Plus />
-        </Button>
+        {onAdjust && (
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label={`Aumentar ${label} em 1`}
+            onClick={() => onAdjust(1)}
+          >
+            <Plus />
+          </Button>
+        )}
       </div>
       <div className="grid gap-2">{children}</div>
     </div>
