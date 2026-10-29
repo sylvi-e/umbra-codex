@@ -4,11 +4,11 @@ Criar campanha exige nome e escolha entre `shadow_slave` (Shadow Slave) e `organ
 
 ## A Organização
 
-Editor separado em resumo, atributos, inventário, habilidades e arma. HP e Mana base começam em 10; deslocamento base em 9 m. Bases são editáveis. A cada 10 pontos: Força +3 espaços, Destreza +4 m, Constituição +10 HP, Inteligência +5 Mana. Modificadores usam `floor(atributo / 2)`, inclusive em zero. Percepção registra marcos de 10 pontos e Interpessoal de 5, aplicados narrativamente pelo mestre.
+A ficha usa o visual de Shadow Slave em identidade, combate, atributos, progressão, inventário, habilidades, arma e notas. Retratos reutilizam upload/recorte WebP, textos reutilizam a paleta de cores, HP tem barra vermelha e HP temporário amarelo; Mana usa barra violeta. Atributos adicionais são editáveis e não alteram os bônus automáticos dos seis atributos do sistema. HP e Mana base começam em 10; deslocamento base em 9 m. Bases são editáveis. A cada 10 pontos: Força +3 espaços, Destreza +4 m, Constituição +10 HP, Inteligência +5 Mana. Modificadores usam `floor(atributo / 2)`, inclusive em zero. Percepção registra marcos de 10 pontos e Interpessoal de 5, aplicados narrativamente pelo mestre.
 
 Inventário começa em 4 espaços. A mochila adiciona capacidade configurável. Cada pilha informa quantidade e espaços totais ocupados; equipado e baú não consomem a capacidade carregada. Itens isentos podem ter zero espaços. Artefatos registram descrição, efeito e malefício. Habilidades registram origem, tipo, custo, duração e descrição. Encantamentos e habilidades iniciais da arma ficam separados. Porcentagem da classe vai de 50 a 100, sem aplicar buffs automáticos.
 
-A Organização usa salvamento manual explícito via RPC transacional `save_organization_character`. O documento completo fica em `character_sheets.organization_data`; HP e Mana são também espelhados em `character_stats` na mesma transação para a listagem. O editor Shadow Slave mantém seus dados normalizados e o autosave existente. Não são convertidos campos de Shadow Slave para A Organização.
+A Organização usa salvamento manual explícito via RPC transacional `save_organization_character`. O documento completo fica em `character_sheets.organization_data`; HP e Mana são também espelhados em `character_stats` na mesma transação para a listagem. Retrato e HP temporário também são sincronizados com os campos usados pelo restante do hub. O editor Shadow Slave mantém seus dados normalizados e o autosave existente. Não são convertidos campos de Shadow Slave para A Organização.
 
 ## Migração e publicação
 

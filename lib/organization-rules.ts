@@ -44,6 +44,14 @@ export type OrganizationAbility = {
   description: string;
 };
 export type OrganizationSheet = {
+  portraitUrl: string;
+  tempHp: number;
+  customAttributes: {
+    id: string;
+    label: string;
+    base: number;
+    notes: string;
+  }[];
   race: string;
   height: string;
   money: number;
@@ -69,6 +77,9 @@ export type OrganizationSheet = {
   notes: string;
 };
 export const organizationDefaults: OrganizationSheet = {
+  portraitUrl: "",
+  tempHp: 0,
+  customAttributes: [],
   race: "",
   height: "",
   money: 0,

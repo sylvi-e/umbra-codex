@@ -1,10 +1,26 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useId, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Plus, Trash2, Save, LoaderCircle } from "lucide-react";
+import {
+  ColoredInput,
+  ColoredTextarea,
+  ColoredText,
+} from "@/components/umbra/colored-text";
+import {
+  CharacterPortraitEditor,
+  CharacterPortraitCard,
+} from "@/components/umbra/character-portrait";
+import { OrganizationCombat } from "@/components/umbra/organization-combat";
+import {
+  CharacterNotesBoard,
+  CharacterNotesBoardView,
+  type BoardNote,
+} from "@/components/umbra/character-notes";
+const ReadOnlyContext = createContext(false);
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeading } from "@/components/umbra/page-heading";
 import { useAuth } from "@/components/umbra/auth-provider";
@@ -44,7 +60,9 @@ export function OrganizationEditor({
     let cancelled = false;
     void createClient()!
       .from("character_sheets")
-      .select("name,age,organization_data,campaign_id")
+      .select(
+        "name,age,portrait_url,organization_data,campaign_id,character_stats(stat_key,current_value,temporary_bonus)",
+      )
       .eq("id", characterId)
       .single()
       .then(
@@ -55,6 +73,12 @@ export function OrganizationEditor({
           data: {
             name: string;
             age: number | null;
+            portrait_url: string | null;
+            character_stats: {
+              stat_key: string;
+              current_value: number | null;
+              temporary_bonus: number;
+            }[];
             campaign_id: string;
             organization_data: Partial<OrganizationSheet>;
           } | null;
@@ -69,6 +93,23 @@ export function OrganizationEditor({
             setSheet({
               ...structuredClone(organizationDefaults),
               ...data.organization_data,
+              portraitUrl:
+                data.portrait_url ?? data.organization_data.portraitUrl ?? "",
+              hp:
+                data.character_stats?.find((s) => s.stat_key === "hp")
+                  ?.current_value ??
+                data.organization_data.hp ??
+                10,
+              mana:
+                data.character_stats?.find((s) => s.stat_key === "essence")
+                  ?.current_value ??
+                data.organization_data.mana ??
+                10,
+              tempHp:
+                data.character_stats?.find((s) => s.stat_key === "hp")
+                  ?.temporary_bonus ??
+                data.organization_data.tempHp ??
+                0,
             });
           }
           setLoading(false);
@@ -163,6 +204,7 @@ export function OrganizationEditor({
             </Button>
           ) : (
             <Button onClick={() => void save()} disabled={saving}>
+              {saving ? <LoaderCircle className="animate-spin" /> : <Save />}
               {saving ? "Salvando…" : "Salvar ficha"}
             </Button>
           )
@@ -176,413 +218,586 @@ export function OrganizationEditor({
           Voltar à campanha
         </Link>
       )}
-      <fieldset disabled={readOnly || saving} className="min-w-0">
-        <Tabs defaultValue="summary">
-          <TabsList className="h-auto flex-wrap">
-            {[
-              ["summary", "Resumo"],
-              ["attributes", "Atributos"],
-              ["inventory", "Inventário"],
-              ["abilities", "Habilidades"],
-              ["weapon", "Arma"],
-            ].map(([key, label]) => (
-              <TabsTrigger key={key} value={key}>
-                {label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <TabsContent
-            value="summary"
-            className="grim-card rounded-2xl p-5 space-y-5"
-          >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <Text label="Nome" value={name} onChange={setName} />
-              <NumberField
-                label="Idade"
-                value={age === "" ? "" : Number(age)}
-                onChange={(v) => setAge(String(v))}
-              />
-              <Text
-                label="Raça"
-                value={sheet.race}
-                onChange={(v) => update("race", v)}
-              />
-              <Text
-                label="Altura"
-                value={sheet.height}
-                onChange={(v) => update("height", v)}
-              />
-              <Text
-                label="Classe"
-                value={sheet.className}
-                onChange={(v) => update("className", v)}
-              />
-              <NumberField
-                label="Porcentagem da classe (50–100%)"
-                min={50}
-                max={100}
-                value={sheet.percentage}
-                onChange={(v) => update("percentage", v)}
-              />
-              <NumberField
-                label={`HP atual / ${totals.hp}`}
-                value={sheet.hp}
-                onChange={(v) => update("hp", v)}
-              />
-              <NumberField
-                label="HP máximo base"
-                value={sheet.hpBase}
-                onChange={(v) => update("hpBase", v)}
-              />
-              <NumberField
-                label={`Mana atual / ${totals.mana}`}
-                value={sheet.mana}
-                onChange={(v) => update("mana", v)}
-              />
-              <NumberField
-                label="Mana máxima base"
-                value={sheet.manaBase}
-                onChange={(v) => update("manaBase", v)}
-              />
-              <NumberField
-                label={`Deslocamento base (total: ${totals.movement} m)`}
-                value={sheet.movementBase}
-                onChange={(v) => update("movementBase", v)}
-              />
-              <NumberField
-                label="Dinheiro"
-                value={sheet.money}
-                onChange={(v) => update("money", v)}
-              />
-              <NumberField
-                label={`CA base (total: ${sheet.armor + sheet.armorBonus})`}
-                value={sheet.armor}
-                onChange={(v) => update("armor", v)}
-              />
-              <NumberField
-                label="Bônus de CA dos equipamentos"
-                value={sheet.armorBonus}
-                onChange={(v) => update("armorBonus", v)}
-              />
-              <NumberField
-                label={`MR base (total: ${sheet.mr + sheet.mrBonus})`}
-                value={sheet.mr}
-                onChange={(v) => update("mr", v)}
-              />
-              <NumberField
-                label="Bônus de MR dos equipamentos"
-                value={sheet.mrBonus}
-                onChange={(v) => update("mrBonus", v)}
-              />
-            </div>
-            <p className="text-sm text-zinc-400">
-              CA reduz dano físico; MR reduz dano mágico. Os bônus por atributos
-              são somados aos valores base. A porcentagem da classe é apenas
-              registrada, sem buffs automáticos.
-            </p>
-            <LongText
-              label="Notas"
-              value={sheet.notes}
-              onChange={(v) => update("notes", v)}
-            />
-          </TabsContent>
-          <TabsContent
-            value="attributes"
-            className="grim-card rounded-2xl p-5 space-y-4"
-          >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {organizationAttributes.map((label, index) => (
-                <NumberField
-                  key={label}
-                  label={`${label} (${Math.floor(sheet.attributes[index] / 2) >= 0 ? "+" : ""}${Math.floor(sheet.attributes[index] / 2)})`}
-                  value={sheet.attributes[index]}
-                  onChange={(v) =>
-                    update(
-                      "attributes",
-                      sheet.attributes.map((a, i) =>
-                        i === index ? Math.floor(v) : a,
-                      ),
-                    )
-                  }
-                />
+      <ReadOnlyContext.Provider value={readOnly}>
+        <fieldset disabled={saving} className="min-w-0">
+          <Tabs defaultValue="summary" className="gap-3">
+            <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-xl bg-white/[.035] p-1 sm:w-fit">
+              {[
+                ["summary", "Identidade"],
+                ["combat", "Combate"],
+                ["progression", "Progressão"],
+                ["attributes", "Atributos"],
+                ["inventory", "Inventário"],
+                ["abilities", "Habilidades"],
+                ["weapon", "Arma"],
+                ["notes", "Notas"],
+              ].map(([key, label]) => (
+                <TabsTrigger
+                  className="flex-none px-3 sm:px-4"
+                  key={key}
+                  value={key}
+                >
+                  {label}
+                </TabsTrigger>
               ))}
-            </div>
-            <p>
-              Força: +3 espaços; Destreza: +4 m; Constituição: +10 HP;
-              Inteligência: +5 Mana a cada 10 pontos.
-            </p>
-            <p>
-              Percepção: {totals.perception} marco(s) de reação divina.
-              Interpessoal: {totals.interpersonal} marco(s) de primeira
-              impressão e beleza. Aplicação pelo mestre.
-            </p>
-          </TabsContent>
-          <TabsContent value="inventory" className="space-y-4">
-            <div className="grim-card rounded-2xl p-5">
-              <NumberField
-                label="Espaços extras da mochila"
-                value={sheet.backpackSlots}
-                onChange={(v) => update("backpackSlots", v)}
-              />
-              <p className={used > totals.slots ? "mt-3 text-red-300" : "mt-3"}>
-                Espaços carregados: {used} / {totals.slots}
-                {used > totals.slots ? " — capacidade excedida" : ""}
-              </p>
-              <p className="mt-2 text-sm text-zinc-400">
-                Espaços representam o total ocupado pela pilha. Equipados e
-                itens no baú não consomem capacidade. Use 0 para itens pequenos
-                ou isentos.
-              </p>
-            </div>
-            {sheet.items.map((item) => (
-              <section
-                key={item.id}
-                className="grim-card rounded-2xl p-5 space-y-3"
+            </TabsList>
+            <TabsContent value="summary" className={readOnly ? "grid items-start gap-5 lg:grid-cols-[300px_1fr]" : "space-y-5"}>
+              {readOnly ? (
+                <CharacterPortraitCard
+                  imageUrl={sheet.portraitUrl}
+                  name={name}
+                />
+              ) : (
+                <CharacterPortraitEditor
+                  characterId={id}
+                  value={sheet.portraitUrl}
+                  onChange={(url) => update("portraitUrl", url)}
+                />
+              )}
+              <SheetSection
+                title="Identidade"
+                description="Informações públicas e narrativas do personagem."
               >
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <Text
-                    label="Item / artefato"
-                    value={item.name}
-                    onChange={(v) =>
-                      update(
-                        "items",
-                        sheet.items.map((i) =>
-                          i.id === item.id ? { ...i, name: v } : i,
-                        ),
-                      )
-                    }
-                  />
-                  <label className="space-y-2">
-                    <span>Localização</span>
-                    <select
-                      className="h-10 w-full rounded-md border bg-background px-3"
-                      value={item.location}
-                      onChange={(e) =>
-                        update(
-                          "items",
-                          sheet.items.map((i) =>
-                            i.id === item.id
-                              ? { ...i, location: e.target.value }
-                              : i,
-                          ),
-                        )
-                      }
-                    >
-                      {[
-                        ["carregado", "Carregado"],
-                        ["equipado", "Equipado"],
-                        ["mochila", "Mochila"],
-                        ["cinto", "Cinto de poções"],
-                        ["bau", "Baú"],
-                      ].map(([v, l]) => (
-                        <option key={v} value={v}>
-                          {l}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <NumberField
-                    label="Quantidade"
-                    min={1}
-                    value={item.quantity}
-                    onChange={(v) =>
-                      update(
-                        "items",
-                        sheet.items.map((i) =>
-                          i.id === item.id ? { ...i, quantity: v } : i,
-                        ),
-                      )
-                    }
+                    label="Nome do personagem"
+                    value={name}
+                    onChange={setName}
                   />
                   <NumberField
-                    label="Espaços totais ocupados"
-                    value={item.slots}
-                    onChange={(v) =>
-                      update(
-                        "items",
-                        sheet.items.map((i) =>
-                          i.id === item.id ? { ...i, slots: v } : i,
-                        ),
-                      )
-                    }
+                    label="Idade"
+                    value={age === "" ? "" : Number(age)}
+                    onChange={(v) => setAge(String(v))}
+                  />
+                  <Text
+                    label="Raça"
+                    value={sheet.race}
+                    onChange={(v) => update("race", v)}
+                  />
+                  <Text
+                    label="Altura"
+                    value={sheet.height}
+                    onChange={(v) => update("height", v)}
                   />
                 </div>
-                {(
-                  [
-                    ["description", "Descrição"],
-                    ["effect", "Efeito / encantamentos"],
-                    ["drawback", "Malefício"],
-                  ] as const
-                ).map(([key, label]) => (
-                  <LongText
-                    key={key}
+                <LongText
+                  label="Anotações do personagem"
+                  value={sheet.notes}
+                  onChange={(v) => update("notes", v)}
+                />
+              </SheetSection>
+            </TabsContent>
+            <TabsContent value="combat">
+              <SheetSection
+                title="Status e combate"
+                description="Recursos atuais, defesas e movimentação."
+              >
+                <OrganizationCombat
+                  sheet={sheet}
+                  update={update}
+                  readOnly={readOnly}
+                />
+              </SheetSection>
+            </TabsContent>
+            <TabsContent value="progression">
+              <SheetSection
+                title="Progressão do agente"
+                description="Classe e porcentagem de domínio. Os buffs são descritos nas habilidades."
+              >
+                <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <Text
+                    label="Classe"
+                    value={sheet.className}
+                    onChange={(v) => update("className", v)}
+                  />
+                  <NumberField
+                    label="Porcentagem da classe (50–100%)"
+                    value={sheet.percentage}
+                    min={50}
+                    max={100}
+                    onChange={(v) => update("percentage", v)}
+                  />
+                  <NumberField
+                    label="Dinheiro"
+                    value={sheet.money}
+                    onChange={(v) => update("money", v)}
+                  />
+                </div>
+              </SheetSection>
+            </TabsContent>
+            <TabsContent
+              value="attributes"
+              className="grim-card rounded-2xl p-5 space-y-4"
+            >
+              <div className="mb-6">
+                <h2 className="font-serif text-2xl">Atributos base</h2>
+                <p className="mt-1 text-sm text-zinc-500">
+                  Cada 2 pontos de base concedem +1. Base 0 concede +0 neste
+                  sistema.
+                </p>
+              </div>
+              <div className="space-y-3">
+                {organizationAttributes.map((label, index) => (
+                  <AttributeRow
+                    key={label}
                     label={label}
-                    value={item[key]}
-                    onChange={(v) =>
+                    base={sheet.attributes[index]}
+                    onBase={(v) =>
                       update(
-                        "items",
-                        sheet.items.map((i) =>
-                          i.id === item.id ? { ...i, [key]: v } : i,
-                        ),
+                        "attributes",
+                        sheet.attributes.map((a, i) => (i === index ? v : a)),
                       )
                     }
                   />
                 ))}
-                {!readOnly && (
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      update(
-                        "items",
-                        sheet.items.filter((i) => i.id !== item.id),
-                      )
-                    }
-                  >
-                    Remover item
-                  </Button>
-                )}
-              </section>
-            ))}
-            {!readOnly && (
-              <Button
-                onClick={() =>
-                  update("items", [
-                    ...sheet.items,
-                    {
-                      id: crypto.randomUUID(),
-                      name: "",
-                      quantity: 1,
-                      slots: 1,
-                      location: "carregado",
-                      description: "",
-                      effect: "",
-                      drawback: "",
-                    },
-                  ])
-                }
-              >
-                Adicionar item ou artefato
-              </Button>
-            )}
-          </TabsContent>
-          <TabsContent value="abilities" className="space-y-4">
-            {sheet.abilities.map((ability) => (
-              <section
-                key={ability.id}
-                className="grim-card rounded-2xl p-5 space-y-3"
-              >
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {(
-                    [
-                      ["name", "Nome"],
-                      ["type", "Tipo (ativa / passiva)"],
-                      ["origin", "Origem (classe / recompensa / outra)"],
-                      ["duration", "Duração"],
-                    ] as const
-                  ).map(([key, label]) => (
+                {sheet.customAttributes.map((attribute) => (
+                  <div key={attribute.id} className="space-y-3">
+                    <AttributeRow
+                      label={attribute.label}
+                      base={attribute.base}
+                      onLabel={(label) =>
+                        update(
+                          "customAttributes",
+                          sheet.customAttributes.map((a) =>
+                            a.id === attribute.id ? { ...a, label } : a,
+                          ),
+                        )
+                      }
+                      onBase={(base) =>
+                        update(
+                          "customAttributes",
+                          sheet.customAttributes.map((a) =>
+                            a.id === attribute.id ? { ...a, base } : a,
+                          ),
+                        )
+                      }
+                      onRemove={() =>
+                        update(
+                          "customAttributes",
+                          sheet.customAttributes.filter(
+                            (a) => a.id !== attribute.id,
+                          ),
+                        )
+                      }
+                    />
+                    <LongText
+                      label={`Notas de ${attribute.label}`}
+                      value={attribute.notes}
+                      onChange={(notes) =>
+                        update(
+                          "customAttributes",
+                          sheet.customAttributes.map((a) =>
+                            a.id === attribute.id ? { ...a, notes } : a,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+              {!readOnly && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-4 border-white/10"
+                  onClick={() =>
+                    update("customAttributes", [
+                      ...sheet.customAttributes,
+                      {
+                        id: crypto.randomUUID(),
+                        label: "Novo atributo",
+                        base: 0,
+                        notes: "",
+                      },
+                    ])
+                  }
+                >
+                  <Plus />
+                  Adicionar atributo
+                </Button>
+              )}
+              <p>
+                Força: +3 espaços; Destreza: +4 m; Constituição: +10 HP;
+                Inteligência: +5 Mana a cada 10 pontos.
+              </p>
+              <p>
+                Percepção: {totals.perception} marco(s) de reação divina.
+                Interpessoal: {totals.interpersonal} marco(s) de primeira
+                impressão e beleza. Aplicação pelo mestre.
+              </p>
+            </TabsContent>
+            <TabsContent value="inventory" className="space-y-4">
+              <div className="grim-card rounded-2xl p-5">
+                <NumberField
+                  label="Espaços extras da mochila"
+                  value={sheet.backpackSlots}
+                  onChange={(v) => update("backpackSlots", v)}
+                />
+                <p
+                  className={used > totals.slots ? "mt-3 text-red-300" : "mt-3"}
+                >
+                  Espaços carregados: {used} / {totals.slots}
+                  {used > totals.slots ? " — capacidade excedida" : ""}
+                </p>
+                <p className="mt-2 text-sm text-zinc-400">
+                  Espaços representam o total ocupado pela pilha. Equipados e
+                  itens no baú não consomem capacidade. Use 0 para itens
+                  pequenos ou isentos.
+                </p>
+              </div>
+              {sheet.items.map((item) => (
+                <section
+                  key={item.id}
+                  className="grim-card rounded-2xl p-5 space-y-3"
+                >
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <Text
-                      key={key}
-                      label={label}
-                      value={ability[key]}
+                      label="Item / artefato"
+                      value={item.name}
                       onChange={(v) =>
                         update(
-                          "abilities",
-                          sheet.abilities.map((a) =>
-                            a.id === ability.id ? { ...a, [key]: v } : a,
+                          "items",
+                          sheet.items.map((i) =>
+                            i.id === item.id ? { ...i, name: v } : i,
+                          ),
+                        )
+                      }
+                    />
+                    <label className="space-y-2">
+                      <span>Localização</span>
+                      <select
+                        disabled={readOnly}
+                        className="h-10 w-full rounded-md border bg-background px-3"
+                        value={item.location}
+                        onChange={(e) =>
+                          update(
+                            "items",
+                            sheet.items.map((i) =>
+                              i.id === item.id
+                                ? { ...i, location: e.target.value }
+                                : i,
+                            ),
+                          )
+                        }
+                      >
+                        {[
+                          ["carregado", "Carregado"],
+                          ["equipado", "Equipado"],
+                          ["mochila", "Mochila"],
+                          ["cinto", "Cinto de poções"],
+                          ["bau", "Baú"],
+                        ].map(([v, l]) => (
+                          <option key={v} value={v}>
+                            {l}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <NumberField
+                      label="Quantidade"
+                      min={1}
+                      value={item.quantity}
+                      onChange={(v) =>
+                        update(
+                          "items",
+                          sheet.items.map((i) =>
+                            i.id === item.id ? { ...i, quantity: v } : i,
+                          ),
+                        )
+                      }
+                    />
+                    <NumberField
+                      label="Espaços totais ocupados"
+                      value={item.slots}
+                      onChange={(v) =>
+                        update(
+                          "items",
+                          sheet.items.map((i) =>
+                            i.id === item.id ? { ...i, slots: v } : i,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  {(
+                    [
+                      ["description", "Descrição"],
+                      ["effect", "Efeito / encantamentos"],
+                      ["drawback", "Malefício"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <LongText
+                      key={key}
+                      label={label}
+                      value={item[key]}
+                      onChange={(v) =>
+                        update(
+                          "items",
+                          sheet.items.map((i) =>
+                            i.id === item.id ? { ...i, [key]: v } : i,
                           ),
                         )
                       }
                     />
                   ))}
-                  <NumberField
-                    label="Custo de Mana"
-                    value={ability.mana}
+                  {!readOnly && (
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        update(
+                          "items",
+                          sheet.items.filter((i) => i.id !== item.id),
+                        )
+                      }
+                    >
+                      Remover item
+                    </Button>
+                  )}
+                </section>
+              ))}
+              {!readOnly && (
+                <Button
+                  onClick={() =>
+                    update("items", [
+                      ...sheet.items,
+                      {
+                        id: crypto.randomUUID(),
+                        name: "",
+                        quantity: 1,
+                        slots: 1,
+                        location: "carregado",
+                        description: "",
+                        effect: "",
+                        drawback: "",
+                      },
+                    ])
+                  }
+                >
+                  Adicionar item ou artefato
+                </Button>
+              )}
+            </TabsContent>
+            <TabsContent value="abilities" className="space-y-4">
+              {sheet.abilities.map((ability) => (
+                <section
+                  key={ability.id}
+                  className="grim-card rounded-2xl p-5 space-y-3"
+                >
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {(
+                      [
+                        ["name", "Nome"],
+                        ["type", "Tipo (ativa / passiva)"],
+                        ["origin", "Origem (classe / recompensa / outra)"],
+                        ["duration", "Duração"],
+                      ] as const
+                    ).map(([key, label]) => (
+                      <Text
+                        key={key}
+                        label={label}
+                        value={ability[key]}
+                        onChange={(v) =>
+                          update(
+                            "abilities",
+                            sheet.abilities.map((a) =>
+                              a.id === ability.id ? { ...a, [key]: v } : a,
+                            ),
+                          )
+                        }
+                      />
+                    ))}
+                    <NumberField
+                      label="Custo de Mana"
+                      value={ability.mana}
+                      onChange={(v) =>
+                        update(
+                          "abilities",
+                          sheet.abilities.map((a) =>
+                            a.id === ability.id ? { ...a, mana: v } : a,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <LongText
+                    label="Descrição, condições e progressão"
+                    value={ability.description}
                     onChange={(v) =>
                       update(
                         "abilities",
                         sheet.abilities.map((a) =>
-                          a.id === ability.id ? { ...a, mana: v } : a,
+                          a.id === ability.id ? { ...a, description: v } : a,
                         ),
                       )
                     }
                   />
-                </div>
-                <LongText
-                  label="Descrição, condições e progressão"
-                  value={ability.description}
-                  onChange={(v) =>
-                    update(
-                      "abilities",
-                      sheet.abilities.map((a) =>
-                        a.id === ability.id ? { ...a, description: v } : a,
-                      ),
-                    )
+                  {!readOnly && (
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        update(
+                          "abilities",
+                          sheet.abilities.filter((a) => a.id !== ability.id),
+                        )
+                      }
+                    >
+                      Remover habilidade
+                    </Button>
+                  )}
+                </section>
+              ))}
+              {!readOnly && (
+                <Button
+                  onClick={() =>
+                    update("abilities", [
+                      ...sheet.abilities,
+                      {
+                        id: crypto.randomUUID(),
+                        name: "",
+                        type: "Ativa",
+                        origin: "Classe",
+                        mana: 0,
+                        duration: "",
+                        description: "",
+                      },
+                    ])
                   }
-                />
-                {!readOnly && (
-                  <Button
-                    variant="outline"
-                    onClick={() =>
-                      update(
-                        "abilities",
-                        sheet.abilities.filter((a) => a.id !== ability.id),
-                      )
-                    }
-                  >
-                    Remover habilidade
-                  </Button>
-                )}
-              </section>
-            ))}
-            {!readOnly && (
-              <Button
-                onClick={() =>
-                  update("abilities", [
-                    ...sheet.abilities,
-                    {
-                      id: crypto.randomUUID(),
-                      name: "",
-                      type: "Ativa",
-                      origin: "Classe",
-                      mana: 0,
-                      duration: "",
-                      description: "",
-                    },
-                  ])
-                }
+                >
+                  Adicionar habilidade
+                </Button>
+              )}
+            </TabsContent>
+            <TabsContent
+              value="weapon"
+              className="grim-card rounded-2xl p-5 space-y-4"
+            >
+              <Text
+                label="Arma vinculada"
+                value={sheet.weapon}
+                onChange={(v) => update("weapon", v)}
+              />
+              <Text
+                label="Dano da arma"
+                value={sheet.weaponDamage}
+                onChange={(v) => update("weaponDamage", v)}
+              />
+              <LongText
+                label="Encantamentos"
+                value={sheet.enchantments}
+                onChange={(v) => update("enchantments", v)}
+              />
+              <LongText
+                label="Habilidades iniciais da arma"
+                value={sheet.initialWeaponAbilities}
+                onChange={(v) => update("initialWeaponAbilities", v)}
+              />
+            </TabsContent>
+            <TabsContent value="notes">
+              <SheetSection
+                title="Notas"
+                description="Anotações do player sobre a ficha e a aventura."
               >
-                Adicionar habilidade
-              </Button>
-            )}
-          </TabsContent>
-          <TabsContent
-            value="weapon"
-            className="grim-card rounded-2xl p-5 space-y-4"
-          >
-            <Text
-              label="Arma vinculada"
-              value={sheet.weapon}
-              onChange={(v) => update("weapon", v)}
-            />
-            <Text
-              label="Dano da arma"
-              value={sheet.weaponDamage}
-              onChange={(v) => update("weaponDamage", v)}
-            />
-            <LongText
-              label="Encantamentos"
-              value={sheet.enchantments}
-              onChange={(v) => update("enchantments", v)}
-            />
-            <LongText
-              label="Habilidades iniciais da arma"
-              value={sheet.initialWeaponAbilities}
-              onChange={(v) => update("initialWeaponAbilities", v)}
-            />
-          </TabsContent>
-        </Tabs>
-      </fieldset>
+                <LongText
+                  label="Notas gerais"
+                  value={sheet.notes}
+                  onChange={(v) => update("notes", v)}
+                />
+                {id ? (
+                  <OrganizationNotes
+                    characterId={id}
+                    userId={user?.id ?? ""}
+                    readOnly={readOnly}
+                  />
+                ) : (
+                  <p className="text-sm text-amber-300/80">
+                    Salve a ficha antes de criar notas avulsas.
+                  </p>
+                )}
+              </SheetSection>
+            </TabsContent>
+          </Tabs>
+        </fieldset>
+      </ReadOnlyContext.Provider>
     </>
+  );
+}
+function SheetSection({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="grim-card rounded-2xl p-5 sm:p-6">
+      <div className="mb-6">
+        <h2 className="font-serif text-2xl">{title}</h2>
+        <p className="mt-1 text-sm text-zinc-500">{description}</p>
+      </div>
+      {children}
+    </section>
+  );
+}
+function AttributeRow({
+  label,
+  base,
+  onBase,
+  onLabel,
+  onRemove,
+}: {
+  label: string;
+  base: number;
+  onBase: (v: number) => void;
+  onLabel?: (v: string) => void;
+  onRemove?: () => void;
+}) {
+  const readOnly = useContext(ReadOnlyContext);
+  const bonus = Math.floor(base / 2);
+  const formatted = bonus >= 0 ? `+${bonus}` : String(bonus);
+  return (
+    <div className="grid gap-3 rounded-2xl border border-white/[.06] bg-white/[.02] p-4 md:grid-cols-[1.2fr_repeat(3,.7fr)_auto]">
+      {onLabel ? (
+        <Text label="Atributo" value={label} onChange={onLabel} />
+      ) : (
+        <div className="space-y-2">
+          <span className="text-sm">Atributo</span>
+          <output className="block rounded-md border border-white/10 bg-black/20 px-3 py-2">
+            {label}
+          </output>
+        </div>
+      )}
+      <NumberField
+        label="Base"
+        value={base}
+        onChange={(v) => onBase(Math.floor(v))}
+      />
+      <div>
+        <span className="text-sm">Bônus</span>
+        <output className="mt-2 block h-10 rounded-md border border-violet-400/20 bg-violet-500/[.07] px-3 py-2 font-semibold text-violet-200">
+          {formatted}
+        </output>
+      </div>
+      <div>
+        <span className="text-sm">Final</span>
+        <output className="mt-2 block h-10 rounded-md border border-white/10 bg-black/20 px-3 py-2 font-semibold">
+          {formatted}
+        </output>
+      </div>
+      {onRemove && !readOnly && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="mt-7"
+          onClick={onRemove}
+          aria-label={`Remover atributo ${label}`}
+        >
+          <Trash2 />
+        </Button>
+      )}
+    </div>
   );
 }
 function Text({
@@ -594,11 +809,22 @@ function Text({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const id = useId();
+  const readOnly = useContext(ReadOnlyContext);
   return (
-    <label className="block space-y-2">
-      <span className="text-sm">{label}</span>
-      <Input value={value} onChange={(e) => onChange(e.target.value)} />
-    </label>
+    <div className="space-y-2">
+      <label htmlFor={id} className="text-sm">
+        {label}
+      </label>
+      {readOnly ? (
+        <ColoredText
+          text={value || "—"}
+          className="block rounded-md border border-white/10 bg-black/20 px-3 py-2"
+        />
+      ) : (
+        <ColoredInput id={id} value={value} onChange={onChange} />
+      )}
+    </div>
   );
 }
 function LongText({
@@ -610,15 +836,22 @@ function LongText({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const id = useId();
+  const readOnly = useContext(ReadOnlyContext);
   return (
-    <label className="block space-y-2">
-      <span className="text-sm">{label}</span>
-      <Textarea
-        className="min-h-28"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </label>
+    <div className="mb-4 space-y-2 last:mb-0">
+      <label htmlFor={id} className="text-sm">
+        {label}
+      </label>
+      {readOnly ? (
+        <ColoredText
+          text={value || "—"}
+          className="block rounded-xl border border-white/[.06] bg-white/[.02] p-4"
+        />
+      ) : (
+        <ColoredTextarea id={id} value={value} onChange={onChange} />
+      )}
+    </div>
   );
 }
 function NumberField({
@@ -634,11 +867,14 @@ function NumberField({
   min?: number;
   max?: number;
 }) {
+  const readOnly = useContext(ReadOnlyContext);
   return (
     <label className="block space-y-2">
       <span className="text-sm">{label}</span>
       <Input
+        disabled={readOnly}
         type="number"
+        className="border-white/10 bg-black/20"
         min={min}
         max={max}
         step="any"
@@ -650,5 +886,43 @@ function NumberField({
         }}
       />
     </label>
+  );
+}
+
+function OrganizationNotes({
+  characterId,
+  userId,
+  readOnly,
+}: {
+  characterId: string;
+  userId: string;
+  readOnly: boolean;
+}) {
+  const [notes, setNotes] = useState<BoardNote[]>([]);
+  useEffect(() => {
+    if (!readOnly) return;
+    let cancelled = false;
+    void createClient()!
+      .from("character_notes")
+      .select(
+        "id,title,content,board_x,board_y,board_width,board_height,z_index,is_pinned",
+      )
+      .eq("character_id", characterId)
+      .eq("note_type", "player")
+      .eq("is_pinned", true)
+      .order("z_index")
+      .then(({ data, error }: { data: BoardNote[] | null; error: unknown }) => {
+        if (cancelled) return;
+        if (error) toast.error("Não foi possível carregar as notas");
+        else setNotes(data ?? []);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [characterId, readOnly]);
+  return readOnly ? (
+    <CharacterNotesBoardView notes={notes} />
+  ) : (
+    <CharacterNotesBoard characterId={characterId} userId={userId} />
   );
 }
