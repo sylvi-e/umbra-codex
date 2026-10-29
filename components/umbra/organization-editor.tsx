@@ -28,6 +28,26 @@ const inventoryLocations = [
   ["equipado", "Equipado"],
   ["cinto", "Cinto de poções"],
 ] as const;
+const abilityGroups = [
+  ["active", "Ativas"],
+  ["passive", "Passivas"],
+  ["other", "Outras"],
+] as const;
+function abilityCategory(type: string) {
+  const normalized = type
+    .replace(/&[0-9a-fr]/gi, "")
+    .trim()
+    .toLocaleLowerCase("pt-BR");
+  if (["ativa", "ativo", "ativas", "ativos", "active"].includes(normalized))
+    return "active";
+  if (
+    ["passiva", "passivo", "passivas", "passivos", "passive"].includes(
+      normalized,
+    )
+  )
+    return "passive";
+  return "other";
+}
 function inventoryCategory(location: string) {
   return inventoryLocations.some(([key]) => key === location)
     ? location
@@ -40,6 +60,7 @@ import {
   LoaderCircle,
   Package,
   ChevronRight,
+  Sparkles,
 } from "lucide-react";
 import {
   ColoredInput,
@@ -94,6 +115,8 @@ export function OrganizationEditor({
   const [error, setError] = useState("");
   const [inventoryLocation, setInventoryLocation] = useState("carregado");
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
+  const [abilityGroup, setAbilityGroup] = useState("active");
+  const [selectedAbility, setSelectedAbility] = useState<string | null>(null);
   const [combatState, setCombatState] = useState<
     "idle" | "saving" | "saved" | "error"
   >("idle");
@@ -819,94 +842,238 @@ export function OrganizationEditor({
               </div>
             </TabsContent>
             <TabsContent value="abilities" className="space-y-4">
-              {sheet.abilities.map((ability) => (
-                <section
-                  key={ability.id}
-                  className="grim-card rounded-2xl p-5 space-y-3"
+              <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
+                <nav
+                  aria-label="Tipos de habilidades"
+                  className="grim-card flex flex-wrap content-start gap-2 rounded-2xl p-3 lg:flex-col"
                 >
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {(
-                      [
-                        ["name", "Nome"],
-                        ["type", "Tipo (ativa / passiva)"],
-                        ["origin", "Origem (classe / recompensa / outra)"],
-                        ["duration", "Duração"],
-                      ] as const
-                    ).map(([key, label]) => (
-                      <Text
-                        key={key}
-                        label={label}
-                        value={ability[key]}
-                        onChange={(v) =>
-                          update(
-                            "abilities",
-                            sheet.abilities.map((a) =>
-                              a.id === ability.id ? { ...a, [key]: v } : a,
-                            ),
-                          )
-                        }
-                      />
-                    ))}
-                    <NumberField
-                      label="Custo de Mana"
-                      value={ability.mana}
-                      onChange={(v) =>
-                        update(
-                          "abilities",
-                          sheet.abilities.map((a) =>
-                            a.id === ability.id ? { ...a, mana: v } : a,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <LongText
-                    label="Descrição, condições e progressão"
-                    value={ability.description}
-                    onChange={(v) =>
-                      update(
-                        "abilities",
-                        sheet.abilities.map((a) =>
-                          a.id === ability.id ? { ...a, description: v } : a,
+                  {abilityGroups
+                    .filter(
+                      ([key]) =>
+                        key !== "other" ||
+                        sheet.abilities.some(
+                          (ability) =>
+                            abilityCategory(ability.type) === "other",
                         ),
-                      )
-                    }
-                  />
-                  {!readOnly && (
-                    <Button
-                      variant="outline"
-                      onClick={() =>
-                        update(
-                          "abilities",
-                          sheet.abilities.filter((a) => a.id !== ability.id),
-                        )
-                      }
-                    >
-                      Remover habilidade
-                    </Button>
-                  )}
+                    )
+                    .map(([key, label]) => (
+                      <button
+                        key={key}
+                        type="button"
+                        aria-pressed={abilityGroup === key}
+                        onClick={() => setAbilityGroup(key)}
+                        className={`flex min-h-11 items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors ${abilityGroup === key ? "bg-violet-500/15 text-violet-200" : "text-zinc-400 hover:bg-white/[.04] hover:text-white"}`}
+                      >
+                        <span>{label}</span>
+                        <span className="rounded-md bg-white/[.05] px-2 py-0.5 text-xs">
+                          {
+                            sheet.abilities.filter(
+                              (ability) =>
+                                abilityCategory(ability.type) === key,
+                            ).length
+                          }
+                        </span>
+                      </button>
+                    ))}
+                </nav>
+                <section className="grim-card min-w-0 rounded-2xl p-4 sm:p-5">
+                  <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h2 className="font-serif text-2xl">
+                        Habilidades{" "}
+                        {abilityGroups
+                          .find(([key]) => key === abilityGroup)?.[1]
+                          .toLocaleLowerCase("pt-BR")}
+                      </h2>
+                      <p className="mt-1 text-sm text-zinc-500">
+                        Clique em uma habilidade para ver seus efeitos,
+                        condições e progressão.
+                      </p>
+                    </div>
+                    {!readOnly && (
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const abilityId = crypto.randomUUID();
+                          update("abilities", [
+                            ...sheet.abilities,
+                            {
+                              id: abilityId,
+                              name: "",
+                              type:
+                                abilityGroup === "passive"
+                                  ? "Passiva"
+                                  : "Ativa",
+                              origin: "Classe",
+                              mana: 0,
+                              duration: "",
+                              description: "",
+                            },
+                          ]);
+                          setSelectedAbility(abilityId);
+                        }}
+                      >
+                        <Plus />
+                        Adicionar habilidade
+                      </Button>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {sheet.abilities.map((ability) => (
+                      <Dialog
+                        key={ability.id}
+                        open={selectedAbility === ability.id}
+                        onOpenChange={(open) =>
+                          setSelectedAbility(open ? ability.id : null)
+                        }
+                      >
+                        {abilityCategory(ability.type) === abilityGroup && (
+                          <DialogTrigger asChild>
+                            <button
+                              type="button"
+                              className="flex w-full items-center gap-3 rounded-xl border border-white/[.07] bg-white/[.02] p-4 text-left transition-colors hover:border-violet-400/30 hover:bg-violet-500/[.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                            >
+                              <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-violet-500/10 text-violet-300">
+                                <Sparkles size={19} />
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <ColoredText
+                                  text={ability.name || "Habilidade sem nome"}
+                                  className="block break-words font-medium"
+                                />
+                                <span className="mt-1 block text-xs text-zinc-500">
+                                  <ColoredText
+                                    text={
+                                      ability.origin || "Origem não informada"
+                                    }
+                                  />{" "}
+                                  · {ability.mana} Mana
+                                  {ability.duration ? (
+                                    <>
+                                      {" "}
+                                      · <ColoredText text={ability.duration} />
+                                    </>
+                                  ) : null}
+                                </span>
+                              </span>
+                              <ChevronRight
+                                className="shrink-0 text-zinc-500"
+                                size={18}
+                              />
+                            </button>
+                          </DialogTrigger>
+                        )}
+                        <DialogContent className="max-h-[90dvh] overflow-y-auto border-white/10 bg-[#100e16] sm:max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle className="font-serif text-2xl">
+                              <ColoredText
+                                text={ability.name || "Nova habilidade"}
+                              />
+                            </DialogTitle>
+                            <DialogDescription>
+                              {readOnly
+                                ? "Tipo, origem, custo, duração e regras da habilidade."
+                                : "Registre a habilidade de classe, recompensa ou outra origem. Salve a ficha para confirmar suas alterações."}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div className="grid gap-3 sm:grid-cols-2">
+                              {(
+                                [
+                                  ["name", "Nome"],
+                                  ["type", "Tipo (ativa / passiva)"],
+                                  [
+                                    "origin",
+                                    "Origem (classe / recompensa / outra)",
+                                  ],
+                                  ["duration", "Duração"],
+                                ] as const
+                              ).map(([key, label]) => (
+                                <Text
+                                  key={key}
+                                  label={label}
+                                  value={ability[key]}
+                                  onChange={(v) =>
+                                    update(
+                                      "abilities",
+                                      sheet.abilities.map((a) =>
+                                        a.id === ability.id
+                                          ? { ...a, [key]: v }
+                                          : a,
+                                      ),
+                                    )
+                                  }
+                                />
+                              ))}
+                              <NumberField
+                                label="Custo de Mana"
+                                value={ability.mana}
+                                onChange={(v) =>
+                                  update(
+                                    "abilities",
+                                    sheet.abilities.map((a) =>
+                                      a.id === ability.id
+                                        ? { ...a, mana: v }
+                                        : a,
+                                    ),
+                                  )
+                                }
+                              />
+                            </div>
+                            <LongText
+                              label="Descrição, condições e progressão"
+                              value={ability.description}
+                              onChange={(v) =>
+                                update(
+                                  "abilities",
+                                  sheet.abilities.map((a) =>
+                                    a.id === ability.id
+                                      ? { ...a, description: v }
+                                      : a,
+                                  ),
+                                )
+                              }
+                            />
+                            {!readOnly && (
+                              <Button
+                                variant="outline"
+                                onClick={() =>
+                                  update(
+                                    "abilities",
+                                    sheet.abilities.filter(
+                                      (a) => a.id !== ability.id,
+                                    ),
+                                  )
+                                }
+                              >
+                                Remover habilidade
+                              </Button>
+                            )}
+                          </div>
+                          <DialogFooter>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setSelectedAbility(null)}
+                            >
+                              {readOnly ? "Fechar" : "Concluir"}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    ))}
+                    {!sheet.abilities.some(
+                      (ability) =>
+                        abilityCategory(ability.type) === abilityGroup,
+                    ) && (
+                      <div className="rounded-xl border border-dashed border-white/10 px-5 py-10 text-center text-sm text-zinc-500">
+                        <Sparkles className="mx-auto mb-3 text-violet-300" />
+                        Nenhuma habilidade nesta categoria.
+                      </div>
+                    )}
+                  </div>
                 </section>
-              ))}
-              {!readOnly && (
-                <Button
-                  onClick={() =>
-                    update("abilities", [
-                      ...sheet.abilities,
-                      {
-                        id: crypto.randomUUID(),
-                        name: "",
-                        type: "Ativa",
-                        origin: "Classe",
-                        mana: 0,
-                        duration: "",
-                        description: "",
-                      },
-                    ])
-                  }
-                >
-                  Adicionar habilidade
-                </Button>
-              )}
+              </div>
             </TabsContent>
             <TabsContent
               value="weapon"
