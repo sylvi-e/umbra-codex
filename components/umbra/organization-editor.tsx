@@ -29,24 +29,16 @@ const inventoryLocations = [
   ["cinto", "Cinto de poções"],
 ] as const;
 const abilityGroups = [
-  ["active", "Ativas"],
-  ["passive", "Passivas"],
-  ["other", "Outras"],
+  ["class", "Classe"],
+  ["extra", "Extra"],
 ] as const;
-function abilityCategory(type: string) {
-  const normalized = type
+function abilityCategory(origin: string) {
+  return origin
     .replace(/&[0-9a-fr]/gi, "")
     .trim()
-    .toLocaleLowerCase("pt-BR");
-  if (["ativa", "ativo", "ativas", "ativos", "active"].includes(normalized))
-    return "active";
-  if (
-    ["passiva", "passivo", "passivas", "passivos", "passive"].includes(
-      normalized,
-    )
-  )
-    return "passive";
-  return "other";
+    .toLocaleLowerCase("pt-BR") === "classe"
+    ? "class"
+    : "extra";
 }
 function inventoryCategory(location: string) {
   return inventoryLocations.some(([key]) => key === location)
@@ -115,7 +107,7 @@ export function OrganizationEditor({
   const [error, setError] = useState("");
   const [inventoryLocation, setInventoryLocation] = useState("carregado");
   const [selectedItem, setSelectedItem] = useState<string | null>(null);
-  const [abilityGroup, setAbilityGroup] = useState("active");
+  const [abilityGroup, setAbilityGroup] = useState("class");
   const [selectedAbility, setSelectedAbility] = useState<string | null>(null);
   const [combatState, setCombatState] = useState<
     "idle" | "saving" | "saved" | "error"
@@ -844,46 +836,36 @@ export function OrganizationEditor({
             <TabsContent value="abilities" className="space-y-4">
               <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
                 <nav
-                  aria-label="Tipos de habilidades"
+                  aria-label="Origens das habilidades"
                   className="grim-card flex flex-wrap content-start gap-2 rounded-2xl p-3 lg:flex-col"
                 >
-                  {abilityGroups
-                    .filter(
-                      ([key]) =>
-                        key !== "other" ||
-                        sheet.abilities.some(
-                          (ability) =>
-                            abilityCategory(ability.type) === "other",
-                        ),
-                    )
-                    .map(([key, label]) => (
-                      <button
-                        key={key}
-                        type="button"
-                        aria-pressed={abilityGroup === key}
-                        onClick={() => setAbilityGroup(key)}
-                        className={`flex min-h-11 items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors ${abilityGroup === key ? "bg-violet-500/15 text-violet-200" : "text-zinc-400 hover:bg-white/[.04] hover:text-white"}`}
-                      >
-                        <span>{label}</span>
-                        <span className="rounded-md bg-white/[.05] px-2 py-0.5 text-xs">
-                          {
-                            sheet.abilities.filter(
-                              (ability) =>
-                                abilityCategory(ability.type) === key,
-                            ).length
-                          }
-                        </span>
-                      </button>
-                    ))}
+                  {abilityGroups.map(([key, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-pressed={abilityGroup === key}
+                      onClick={() => setAbilityGroup(key)}
+                      className={`flex min-h-11 items-center justify-between gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors ${abilityGroup === key ? "bg-violet-500/15 text-violet-200" : "text-zinc-400 hover:bg-white/[.04] hover:text-white"}`}
+                    >
+                      <span>{label}</span>
+                      <span className="rounded-md bg-white/[.05] px-2 py-0.5 text-xs">
+                        {
+                          sheet.abilities.filter(
+                            (ability) =>
+                              abilityCategory(ability.origin) === key,
+                          ).length
+                        }
+                      </span>
+                    </button>
+                  ))}
                 </nav>
                 <section className="grim-card min-w-0 rounded-2xl p-4 sm:p-5">
                   <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <h2 className="font-serif text-2xl">
-                        Habilidades{" "}
-                        {abilityGroups
-                          .find(([key]) => key === abilityGroup)?.[1]
-                          .toLocaleLowerCase("pt-BR")}
+                        {abilityGroup === "class"
+                          ? "Habilidades de Classe"
+                          : "Habilidades Extras"}
                       </h2>
                       <p className="mt-1 text-sm text-zinc-500">
                         Clique em uma habilidade para ver seus efeitos,
@@ -900,11 +882,9 @@ export function OrganizationEditor({
                             {
                               id: abilityId,
                               name: "",
-                              type:
-                                abilityGroup === "passive"
-                                  ? "Passiva"
-                                  : "Ativa",
-                              origin: "Classe",
+                              type: "Ativa",
+                              origin:
+                                abilityGroup === "extra" ? "Extra" : "Classe",
                               mana: 0,
                               duration: "",
                               description: "",
@@ -927,7 +907,7 @@ export function OrganizationEditor({
                           setSelectedAbility(open ? ability.id : null)
                         }
                       >
-                        {abilityCategory(ability.type) === abilityGroup && (
+                        {abilityCategory(ability.origin) === abilityGroup && (
                           <DialogTrigger asChild>
                             <button
                               type="button"
@@ -944,7 +924,10 @@ export function OrganizationEditor({
                                 <span className="mt-1 block text-xs text-zinc-500">
                                   <ColoredText
                                     text={
-                                      ability.origin || "Origem não informada"
+                                      abilityCategory(ability.origin) ===
+                                      "class"
+                                        ? "Classe"
+                                        : "Extra"
                                     }
                                   />{" "}
                                   · {ability.mana} Mana
@@ -973,7 +956,7 @@ export function OrganizationEditor({
                             <DialogDescription>
                               {readOnly
                                 ? "Tipo, origem, custo, duração e regras da habilidade."
-                                : "Registre a habilidade de classe, recompensa ou outra origem. Salve a ficha para confirmar suas alterações."}
+                                : "Registre a habilidade de Classe ou Extra. Salve a ficha para confirmar suas alterações."}
                             </DialogDescription>
                           </DialogHeader>
                           <div className="space-y-4">
@@ -982,10 +965,6 @@ export function OrganizationEditor({
                                 [
                                   ["name", "Nome"],
                                   ["type", "Tipo (ativa / passiva)"],
-                                  [
-                                    "origin",
-                                    "Origem (classe / recompensa / outra)",
-                                  ],
                                   ["duration", "Duração"],
                                 ] as const
                               ).map(([key, label]) => (
@@ -1005,6 +984,32 @@ export function OrganizationEditor({
                                   }
                                 />
                               ))}
+                              <label className="space-y-2">
+                                <span className="text-sm">Origem</span>
+                                <select
+                                  aria-label="Origem da habilidade"
+                                  disabled={readOnly}
+                                  className="h-10 w-full rounded-md border border-white/10 bg-background px-3"
+                                  value={
+                                    abilityCategory(ability.origin) === "class"
+                                      ? "Classe"
+                                      : "Extra"
+                                  }
+                                  onChange={(event) =>
+                                    update(
+                                      "abilities",
+                                      sheet.abilities.map((a) =>
+                                        a.id === ability.id
+                                          ? { ...a, origin: event.target.value }
+                                          : a,
+                                      ),
+                                    )
+                                  }
+                                >
+                                  <option value="Classe">Classe</option>
+                                  <option value="Extra">Extra</option>
+                                </select>
+                              </label>
                               <NumberField
                                 label="Custo de Mana"
                                 value={ability.mana}
@@ -1064,7 +1069,7 @@ export function OrganizationEditor({
                     ))}
                     {!sheet.abilities.some(
                       (ability) =>
-                        abilityCategory(ability.type) === abilityGroup,
+                        abilityCategory(ability.origin) === abilityGroup,
                     ) && (
                       <div className="rounded-xl border border-dashed border-white/10 px-5 py-10 text-center text-sm text-zinc-500">
                         <Sparkles className="mx-auto mb-3 text-violet-300" />
