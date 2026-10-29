@@ -1,6 +1,14 @@
 "use client";
 import Link from "next/link";
-import { createContext, useContext, useEffect, useId, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +34,8 @@ import { PageHeading } from "@/components/umbra/page-heading";
 import { useAuth } from "@/components/umbra/auth-provider";
 import { createClient } from "@/lib/supabase/client";
 import {
+  applyOrganizationCombatChange,
+  type OrganizationCombatKey,
   organizationAttributes,
   organizationDefaults,
   organizationTotals,
@@ -54,6 +64,55 @@ export function OrganizationEditor({
   const [loading, setLoading] = useState(Boolean(characterId));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [combatState, setCombatState] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const combatPending = useRef<Partial<Record<OrganizationCombatKey, number>>>(
+    {},
+  );
+  const combatBusy = useRef(false);
+  const combatSnapshot = useRef(sheet);
+  const flushCombat = useCallback(async () => {
+    if (!id || combatBusy.current) return;
+    combatBusy.current = true;
+    try {
+      while (Object.keys(combatPending.current).length) {
+        const changes = combatPending.current;
+        combatPending.current = {};
+        setCombatState("saving");
+        try {
+          const { error } = await createClient()!.rpc(
+            "update_organization_combat",
+            { target_id: id, changes },
+          );
+          if (error) throw error;
+        } catch (reason) {
+          combatPending.current = { ...changes, ...combatPending.current };
+          throw reason;
+        }
+      }
+      setCombatState("saved");
+    } catch (reason) {
+      setCombatState("error");
+      toast.error(
+        (reason as { message?: string }).message ??
+          "Não foi possível salvar o combate. Tente novamente.",
+      );
+    } finally {
+      combatBusy.current = false;
+    }
+  }, [id]);
+  function updateCombat(key: OrganizationCombatKey, value: number) {
+    const before = combatSnapshot.current;
+    const next = applyOrganizationCombatChange(before, key, value);
+    combatSnapshot.current = next;
+    setSheet(next);
+    if (!readOnly) return;
+    combatPending.current[key] = next[key];
+    if (next.hp !== before.hp) combatPending.current.hp = next.hp;
+    if (next.mana !== before.mana) combatPending.current.mana = next.mana;
+    void flushCombat();
+  }
   const basePath = kind === "npc" ? "/npcs" : "/fichas";
   useEffect(() => {
     if (!characterId) return;
@@ -90,7 +149,7 @@ export function OrganizationEditor({
             setName(data.name);
             setAge(data.age?.toString() ?? "");
             setCampaign(data.campaign_id);
-            setSheet({
+            const loaded: OrganizationSheet = {
               ...structuredClone(organizationDefaults),
               ...data.organization_data,
               portraitUrl:
@@ -110,7 +169,9 @@ export function OrganizationEditor({
                   ?.temporary_bonus ??
                 data.organization_data.tempHp ??
                 0,
-            });
+            };
+            combatSnapshot.current = loaded;
+            setSheet(loaded);
           }
           setLoading(false);
         },
@@ -123,7 +184,11 @@ export function OrganizationEditor({
     key: K,
     value: OrganizationSheet[K],
   ) {
-    setSheet((current) => ({ ...current, [key]: value }));
+    setSheet((current) => {
+      const next = { ...current, [key]: value };
+      combatSnapshot.current = next;
+      return next;
+    });
   }
   const totals = organizationTotals(
     sheet.attributes,
@@ -241,7 +306,14 @@ export function OrganizationEditor({
                 </TabsTrigger>
               ))}
             </TabsList>
-            <TabsContent value="summary" className={readOnly ? "grid items-start gap-5 lg:grid-cols-[300px_1fr]" : "space-y-5"}>
+            <TabsContent
+              value="summary"
+              className={
+                readOnly
+                  ? "grid items-start gap-5 lg:grid-cols-[300px_1fr]"
+                  : "space-y-5"
+              }
+            >
               {readOnly ? (
                 <CharacterPortraitCard
                   imageUrl={sheet.portraitUrl}
@@ -287,11 +359,37 @@ export function OrganizationEditor({
                 title="Status e combate"
                 description="Recursos atuais, defesas e movimentação."
               >
-                <OrganizationCombat
-                  sheet={sheet}
-                  update={update}
-                  readOnly={readOnly}
-                />
+                {readOnly && (
+                  <div className="mb-4 flex flex-wrap items-center gap-3 text-sm">
+                    <p
+                      role="status"
+                      className={
+                        combatState === "error"
+                          ? "text-red-300"
+                          : "text-zinc-400"
+                      }
+                    >
+                      {combatState === "saving"
+                        ? "Salvando alterações…"
+                        : combatState === "saved"
+                          ? "Alterações salvas"
+                          : combatState === "error"
+                            ? "Alterações ainda não salvas"
+                            : "Ajuste os valores aqui. As alterações são salvas automaticamente."}
+                    </p>
+                    {combatState === "error" && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void flushCombat()}
+                      >
+                        Tentar salvar novamente
+                      </Button>
+                    )}
+                  </div>
+                )}
+                <OrganizationCombat sheet={sheet} update={updateCombat} />
               </SheetSection>
             </TabsContent>
             <TabsContent value="progression">

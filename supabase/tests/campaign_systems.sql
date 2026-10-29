@@ -20,6 +20,13 @@ do $$ declare c uuid; n uuid; p uuid; payload jsonb := '{"attributes":[13,10,10,
  perform set_config('test.owner_character',p::text,true);
  if not exists(select 1 from public.character_sheets where id=p and portrait_url='test/portrait.webp' and organization_data->'customAttributes'->0->>'label'='Sorte') then raise exception 'Portrait or custom attributes lost'; end if;
  if not exists(select 1 from public.character_stats where character_id=p and stat_key='hp' and temporary_bonus=5) then raise exception 'Temporary HP not saved'; end if;
+ perform public.update_organization_combat(p,'{"hp":3,"tempHp":8,"mana":2,"armor":4,"mr":5,"movementBase":12}'::jsonb);
+ if not exists(select 1 from public.character_stats where character_id=p and stat_key='hp' and current_value=3 and temporary_bonus=8) then raise exception 'Live HP adjustment failed'; end if;
+ if not exists(select 1 from public.character_sheets where id=p and organization_data->>'armor'='4' and organization_data->>'mr'='5' and organization_data->>'movementBase'='12' and portrait_url='test/portrait.webp' and organization_data->'customAttributes'->0->>'label'='Sorte') then raise exception 'Combat patch changed unrelated fields'; end if;
+ begin
+  perform public.update_organization_combat(p,'{"notes":"forbidden"}'::jsonb);
+  raise exception 'Non-combat patch accepted';
+ exception when raise_exception then if sqlerrm='Non-combat patch accepted' then raise; end if; end;
  if public.duplicate_character(p) is null then raise exception 'Duplication failed'; end if;
  begin
   update public.campaigns set system_key='shadow_slave' where id=c;
@@ -44,6 +51,10 @@ do $$ declare c uuid:=current_setting('test.campaign')::uuid; payload jsonb := '
   update public.character_sheets set is_npc=true where id=p;
   raise exception 'Player promoted own sheet to NPC';
  exception when raise_exception then if sqlerrm='Player promoted own sheet to NPC' then raise; end if; end;
+ begin
+  perform public.update_organization_combat(current_setting('test.npc')::uuid,'{"hp":1}'::jsonb);
+  raise exception 'Another player changed hidden NPC';
+ exception when raise_exception then if sqlerrm='Another player changed hidden NPC' then raise; end if; end;
  if exists(select 1 from public.character_stats where character_id=current_setting('test.npc')::uuid) then raise exception 'Child table leak'; end if;
 end $$;
 rollback;

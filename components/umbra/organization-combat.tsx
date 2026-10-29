@@ -10,15 +10,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { OrganizationSheet } from "@/lib/organization-rules";
+import type {
+  OrganizationSheet,
+  OrganizationCombatKey,
+} from "@/lib/organization-rules";
 import { organizationTotals } from "@/lib/organization-rules";
 type Props = {
   readOnly?: boolean;
   sheet: OrganizationSheet;
-  update: <K extends keyof OrganizationSheet>(
-    key: K,
-    value: OrganizationSheet[K],
-  ) => void;
+  update: (key: OrganizationCombatKey, value: number) => void;
 };
 export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
   const totals = organizationTotals(
@@ -236,49 +236,61 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Metric
           label="CA"
-          description="Redução de dano físico"
+          description={`Redução de dano físico · ${sheet.armor} base + ${sheet.armorBonus} equipamentos`}
           icon={Shield}
           tone="border-sky-400/20 bg-sky-500/[.07] text-sky-300"
+          onAdjust={(delta) =>
+            update("armor", Math.max(0, sheet.armor + delta))
+          }
           total={sheet.armor + sheet.armorBonus}
         >
           <ResourceInput
-            label="Base"
+            label="CA base"
+            tone="blue"
             value={sheet.armor}
             onChange={(v) => update("armor", v)}
           />
           <ResourceInput
-            label="Equipamentos"
+            label="CA dos equipamentos"
+            tone="blue"
             value={sheet.armorBonus}
             onChange={(v) => update("armorBonus", v)}
           />
         </Metric>
         <Metric
           label="MR"
-          description="Redução de dano mágico"
+          description={`Redução de dano mágico · ${sheet.mr} base + ${sheet.mrBonus} equipamentos`}
           icon={ShieldCheck}
           tone="border-violet-400/20 bg-violet-500/[.07] text-violet-300"
+          onAdjust={(delta) => update("mr", Math.max(0, sheet.mr + delta))}
           total={sheet.mr + sheet.mrBonus}
         >
           <ResourceInput
-            label="Base"
+            label="MR base"
+            tone="violet"
             value={sheet.mr}
             onChange={(v) => update("mr", v)}
           />
           <ResourceInput
-            label="Equipamentos"
+            label="MR dos equipamentos"
+            tone="violet"
             value={sheet.mrBonus}
             onChange={(v) => update("mrBonus", v)}
           />
         </Metric>
         <Metric
           label="Deslocamento"
-          description="Movimento por turno"
+          description={`Metros por turno · ${sheet.movementBase} base + ${totals.movement - sheet.movementBase} de Destreza`}
           icon={Footprints}
           tone="border-emerald-400/20 bg-emerald-500/[.07] text-emerald-300"
+          onAdjust={(delta) =>
+            update("movementBase", Math.max(0, sheet.movementBase + delta))
+          }
           total={totals.movement}
         >
           <ResourceInput
             label="Base em metros"
+            tone="emerald"
             value={sheet.movementBase}
             onChange={(v) => update("movementBase", v)}
           />
@@ -296,24 +308,45 @@ function ResourceInput({
   label: string;
   value: number;
   onChange: (v: number) => void;
-  tone?: "rose" | "violet";
+  tone?: "rose" | "violet" | "blue" | "emerald";
 }) {
   return (
-    <label
-      className={`block rounded-xl border p-3 transition-colors ${tone === "rose" ? "border-rose-400/20 bg-rose-500/[.07] text-rose-300" : "border-violet-400/20 bg-violet-500/[.07] text-violet-300"}`}
+    <div
+      className={`block rounded-xl border p-3 transition-colors ${{ rose: "border-rose-400/20 bg-rose-500/[.07] text-rose-300", violet: "border-violet-400/20 bg-violet-500/[.07] text-violet-300", blue: "border-sky-400/20 bg-sky-500/[.07] text-sky-300", emerald: "border-emerald-400/20 bg-emerald-500/[.07] text-emerald-300" }[tone]}`}
     >
       <span className="block text-xs font-semibold uppercase tracking-wider">
         {label}
       </span>
-      <Input
-        aria-label={label}
-        type="number"
-        min={0}
-        className="mt-2 h-auto border-0 bg-transparent p-0 text-xl font-bold tabular-nums text-white shadow-none focus-visible:ring-0"
-        value={value}
-        onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
-      />
-    </label>
+      <div className="mt-2 flex items-center gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={`Diminuir ${label} em 1`}
+          disabled={value <= 0}
+          onClick={() => onChange(Math.max(0, value - 1))}
+        >
+          <Minus />
+        </Button>
+        <Input
+          aria-label={label}
+          type="number"
+          min={0}
+          className="mt-2 h-auto border-0 bg-transparent p-0 text-xl font-bold tabular-nums text-white shadow-none focus-visible:ring-0"
+          value={value}
+          onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={`Aumentar ${label} em 1`}
+          onClick={() => onChange(value + 1)}
+        >
+          <Plus />
+        </Button>
+      </div>
+    </div>
   );
 }
 function Metric({
@@ -322,6 +355,7 @@ function Metric({
   icon: Icon,
   tone,
   total,
+  onAdjust,
   children,
 }: {
   label: string;
@@ -329,6 +363,7 @@ function Metric({
   icon: typeof Shield;
   tone: string;
   total: number;
+  onAdjust: (delta: number) => void;
   children: React.ReactNode;
 }) {
   return (
@@ -344,9 +379,29 @@ function Metric({
         </div>
         <Icon size={18} />
       </div>
-      <output className="my-4 block text-3xl font-bold tabular-nums text-white">
-        {total}
-      </output>
+      <div className="my-4 flex items-center justify-center gap-3">
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          aria-label={`Diminuir ${label} em 1`}
+          onClick={() => onAdjust(-1)}
+        >
+          <Minus />
+        </Button>
+        <output className="min-w-20 text-center text-3xl font-bold tabular-nums text-white">
+          {total}
+        </output>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          aria-label={`Aumentar ${label} em 1`}
+          onClick={() => onAdjust(1)}
+        >
+          <Plus />
+        </Button>
+      </div>
       <div className="grid gap-2">{children}</div>
     </div>
   );
