@@ -8,6 +8,7 @@ export type Profile = {
   role?: UserRole;
 };
 export type CharacterSummary = {
+  system_key: "shadow_slave" | "organization";
   id: string;
   name: string;
   true_name: string | null;

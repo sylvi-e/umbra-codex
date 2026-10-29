@@ -1,13 +1,15 @@
-import { AdminOnly } from "@/components/umbra/admin-only";
 import { AppShell } from "@/components/umbra/app-shell";
-import { CharacterEditor } from "@/components/umbra/character-editor";
+import { SheetEditor as CharacterEditor } from "@/components/umbra/sheet-dispatcher";
 
-export default function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ campanha?: string }>;
+}) {
+  const { campanha } = await searchParams;
   return (
     <AppShell>
-      <AdminOnly>
-        <CharacterEditor kind="npc" />
-      </AdminOnly>
+      <CharacterEditor campaignId={campanha} kind="npc" />
     </AppShell>
   );
 }

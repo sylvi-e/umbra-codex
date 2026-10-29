@@ -48,13 +48,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (!configured) return <SetupPending />;
   if (!user) return <Loading />;
   const isAdmin = profile?.role === "admin";
-  const visiblePlayerNav = isAdmin
-    ? [
-        ...playerNav.slice(0, 2),
-        { href: "/npcs", label: "NPCs", icon: PersonStanding },
-        ...playerNav.slice(2),
-      ]
-    : playerNav;
+  const visiblePlayerNav = [
+    ...playerNav.slice(0, 2),
+    { href: "/npcs", label: "NPCs", icon: PersonStanding },
+    ...playerNav.slice(2),
+  ];
   const inNpcArea = pathname === "/npcs" || pathname.startsWith("/npcs/");
   async function signOut() {
     await createClient()?.auth.signOut();
@@ -163,7 +161,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             size="sm"
             className="ml-auto bg-violet-600 hover:bg-violet-500"
           >
-            <Link href={inNpcArea ? "/npcs/nova" : "/fichas/nova"}>{inNpcArea ? "Novo NPC" : "Nova ficha"}</Link>
+            <Link href={inNpcArea ? "/npcs/nova" : "/fichas/nova"}>
+              {inNpcArea ? "Novo NPC" : "Nova ficha"}
+            </Link>
           </Button>
         </header>
         <main className="mx-auto w-full max-w-[1500px] p-4 sm:p-6 lg:p-8">
@@ -171,7 +171,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </main>
       </div>
       <nav
-        className={`app-mobile-nav fixed inset-x-3 bottom-3 z-40 grid ${isAdmin ? "grid-cols-5" : "grid-cols-4"} rounded-2xl border border-white/10 bg-[#111018]/95 p-1 shadow-2xl backdrop-blur-xl lg:hidden`}
+        className={`app-mobile-nav fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-2xl border border-white/10 bg-[#111018]/95 p-1 shadow-2xl backdrop-blur-xl lg:hidden`}
         aria-label="Navegação móvel"
       >
         {visiblePlayerNav.map((item) => (

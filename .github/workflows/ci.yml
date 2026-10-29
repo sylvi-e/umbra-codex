@@ -43,5 +43,8 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Campaign migration and RLS
+        run: pnpm test:campaign-db
+
       - name: Build
         run: pnpm build

@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Archive,
   BookOpenText,
@@ -23,30 +23,38 @@ import { PageHeading } from "@/components/umbra/page-heading";
 import { CharacterPortraitThumbnail } from "@/components/umbra/character-portrait";
 import { createClient } from "@/lib/supabase/client";
 import type { CharacterSummary } from "@/lib/types";
-export function CharacterList({ kind = "player" }: { kind?: "player" | "npc" }) {
+export function CharacterList({
+  kind = "player",
+  campaignId,
+}: {
+  kind?: "player" | "npc";
+  campaignId?: string;
+}) {
   const router = useRouter();
   const isNpc = kind === "npc";
   const basePath = isNpc ? "/npcs" : "/fichas";
   const [items, setItems] = useState<CharacterSummary[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  async function load() {
+  const load = useCallback(async () => {
     const client = createClient();
     if (!client) return;
-    const { data, error } = await client
+    let request = client
       .from("character_summary")
       .select("*")
       .eq("is_npc", isNpc)
       .is("archived_at", null)
       .order("updated_at", { ascending: false });
+    if (campaignId) request = request.eq("campaign_id", campaignId);
+    const { data, error } = await request;
     if (error) toast.error(error.message);
     else setItems((data ?? []) as CharacterSummary[]);
     setLoading(false);
-  }
+  }, [campaignId, isNpc]);
   useEffect(() => {
     const task = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(task);
-  }, []);
+  }, [load]);
   const filtered = useMemo(
     () =>
       items.filter((item) =>
@@ -82,10 +90,16 @@ export function CharacterList({ kind = "player" }: { kind?: "player" | "npc" }) 
       <PageHeading
         eyebrow={isNpc ? "Controle do mestre" : "Arquivo de personagens"}
         title={isNpc ? "NPCs" : "Suas fichas"}
-        description={isNpc ? "Crie e organize fichas de personagens não jogáveis." : "Pesquise, abra, duplique ou arquive registros."}
+        description={
+          isNpc
+            ? "Crie e organize fichas de personagens não jogáveis."
+            : "Pesquise, abra, duplique ou arquive registros."
+        }
         action={
           <Button asChild className="bg-violet-600 hover:bg-violet-500">
-            <Link href={`${basePath}/nova`}>
+            <Link
+              href={`${basePath}/nova${campaignId ? `?campanha=${campaignId}` : ""}`}
+            >
               <Plus />
               {isNpc ? "Novo NPC" : "Nova ficha"}
             </Link>
@@ -113,13 +127,17 @@ export function CharacterList({ kind = "player" }: { kind?: "player" | "npc" }) 
               <div className="flex items-start justify-between">
                 <Link href={`${basePath}/${item.id}`} className="min-w-0">
                   <p className="text-xs uppercase tracking-[.12em] text-violet-300/70">
-                    {item.rank_name ?? "Sem rank"}
+                    {item.system_key === "organization"
+                      ? "A Organização"
+                      : (item.rank_name ?? "Sem rank")}
                   </p>
                   <h2 className="mt-2 truncate font-serif text-2xl">
                     {item.name}
                   </h2>
                   <p className="mt-1 truncate text-sm text-zinc-500">
-                    {item.true_name || "Nome Verdadeiro não registrado"}
+                    {item.system_key === "organization"
+                      ? item.class_name || "Sem classe"
+                      : item.true_name || "Nome Verdadeiro não registrado"}
                   </p>
                 </Link>
                 <DropdownMenu>
@@ -144,14 +162,26 @@ export function CharacterList({ kind = "player" }: { kind?: "player" | "npc" }) 
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <CharacterPortraitThumbnail imageUrl={item.portrait_url} name={item.name} />
+              <CharacterPortraitThumbnail
+                imageUrl={item.portrait_url}
+                name={item.name}
+              />
               <div className="mt-6 grid grid-cols-3 gap-2 text-center text-xs">
                 <Value label="HP" value={`${item.current_hp}/${item.max_hp}`} />
                 <Value
-                  label="Essência"
+                  label={
+                    item.system_key === "organization" ? "Mana" : "Essência"
+                  }
                   value={`${item.current_essence}/${item.max_essence}`}
                 />
-                <Value label="Núcleos" value={String(item.soul_cores)} />
+                <Value
+                  label="Sistema"
+                  value={
+                    item.system_key === "organization"
+                      ? "A Organização"
+                      : "Shadow Slave"
+                  }
+                />
               </div>
               <div className="mt-5 flex gap-2">
                 <Button
@@ -171,9 +201,13 @@ export function CharacterList({ kind = "player" }: { kind?: "player" | "npc" }) 
       ) : (
         <div className="grim-card rounded-2xl p-10 text-center">
           <BookOpenText className="mx-auto text-violet-300" />
-          <h2 className="mt-4 font-serif text-2xl">{isNpc ? "Nenhum NPC encontrado" : "Nenhuma ficha encontrada"}</h2>
+          <h2 className="mt-4 font-serif text-2xl">
+            {isNpc ? "Nenhum NPC encontrado" : "Nenhuma ficha encontrada"}
+          </h2>
           <p className="mt-2 text-zinc-500">
-            {isNpc ? "Crie um NPC ou ajuste sua pesquisa." : "Crie um personagem ou ajuste sua pesquisa."}
+            {isNpc
+              ? "Crie um NPC ou ajuste sua pesquisa."
+              : "Crie um personagem ou ajuste sua pesquisa."}
           </p>
         </div>
       )}
