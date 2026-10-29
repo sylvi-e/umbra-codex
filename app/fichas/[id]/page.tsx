@@ -1,5 +1,5 @@
 import { AppShell } from "@/components/umbra/app-shell";
-import { CharacterView } from "@/components/umbra/character-view";
+import { SheetView as CharacterView } from "@/components/umbra/sheet-dispatcher";
 export default async function Page({
   params,
 }: {

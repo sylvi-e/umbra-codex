@@ -4,7 +4,7 @@
 
 - **Interface:** App Router, componentes client/server, Tailwind e primitivas acessíveis.
 - **Identidade:** Supabase Auth com e-mail/senha e sessão persistente.
-- **Dados:** PostgreSQL normalizado. JSONB aparece apenas em regras, metadados, opções e valores customizados.
+- **Dados:** PostgreSQL normalizado. JSONB aparece em regras, metadados, opções, valores customizados e no documento da ficha de A Organização. Veja [Campanhas e sistemas](CAMPAIGN_SYSTEMS.md).
 - **Autorização:** RLS e funções auxiliares no schema privado.
 - **Arquivos:** buckets separados; mídias públicas usam URL estável e arquivos secretos usam acesso autenticado.
 
@@ -20,7 +20,7 @@ Campos secretos permanecem na tabela protegida. Compartilhamento parcial deverá
 
 ## Persistência e histórico
 
-O editor salva após 900 ms sem interação. Recursos usam RPC transacional e registram valor anterior/novo em `character_history`. Operações administrativas geram `audit_logs`.
+O editor Shadow Slave salva após 900 ms sem interação. A Organização usa salvamento manual transacional. Recursos usam RPC transacional e registram valor anterior/novo em `character_history`. Operações administrativas geram `audit_logs`.
 
 ## Dados configuráveis
 

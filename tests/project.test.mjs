@@ -377,7 +377,7 @@ test("campos removidos não aparecem na interface da ficha", async () => {
   assert.doesNotMatch(identityView, /[\"'](?:Descrição física|Objetivos|Origem|Ocupação)[\"']/);
 });
 
-test("NPCs usam fichas separadas e são exclusivos de administradores", async () => {
+test("NPCs usam fichas separadas; acesso de mestres é validado no banco", async () => {
   const migration = await readFile(npcMigrationPath, "utf8");
   const readPolicyMigration = await readFile(npcReadPolicyMigrationPath, "utf8");
   const insertReturningMigration = await readFile(npcInsertReturningMigrationPath, "utf8");
@@ -397,7 +397,7 @@ test("NPCs usam fichas separadas e são exclusivos de administradores", async ()
   assert.match(shell, /profile\?\.role === "admin"/);
   assert.match(list, /\.eq\("is_npc", isNpc\)/);
   assert.match(editor, /is_npc: isNpc/);
-  assert.match(npcPage, /<AdminOnly>/);
+  assert.doesNotMatch(npcPage, /<AdminOnly>/);
   assert.match(npcPage, /<CharacterList kind="npc"/);
 });
 

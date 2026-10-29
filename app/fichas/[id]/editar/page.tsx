@@ -1,5 +1,5 @@
 import { AppShell } from "@/components/umbra/app-shell";
-import { CharacterEditor } from "@/components/umbra/character-editor";
+import { SheetEditor as CharacterEditor } from "@/components/umbra/sheet-dispatcher";
 export default async function Page({
   params,
 }: {

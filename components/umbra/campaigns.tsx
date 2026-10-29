@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Castle, KeyRound, Plus, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
@@ -36,6 +37,8 @@ type Campaign = {
   status: string;
   invite_code: string;
   created_at: string;
+  system_key: string;
+  owner_id: string;
 };
 export function Campaigns() {
   const { user, profile } = useAuth();
@@ -45,7 +48,9 @@ export function Campaigns() {
   async function load() {
     const { data } = await createClient()!
       .from("campaigns")
-      .select("id,name,description,status,invite_code,created_at")
+      .select(
+        "id,name,description,status,invite_code,created_at,system_key,owner_id",
+      )
       .is("archived_at", null)
       .order("created_at", { ascending: false });
     setItems((data ?? []) as Campaign[]);
@@ -68,6 +73,7 @@ export function Campaigns() {
         description: String(formData.get("description") ?? "") || null,
         owner_id: user.id,
         status: "active",
+        system_key: String(formData.get("system_key")),
       });
     if (error) toast.error(error.message);
     else {
@@ -118,6 +124,16 @@ export function Campaigns() {
                   <Label htmlFor="name">Nome</Label>
                   <Input id="name" name="name" required />
                 </div>
+                <label className="block space-y-2">
+                  <span>Sistema</span>
+                  <select
+                    name="system_key"
+                    className="h-10 w-full rounded-md border bg-background px-3"
+                  >
+                    <option value="shadow_slave">Shadow Slave</option>
+                    <option value="organization">A Organização</option>
+                  </select>
+                </label>
                 <div className="space-y-2">
                   <Label htmlFor="description">Descrição</Label>
                   <Textarea id="description" name="description" />
@@ -130,6 +146,31 @@ export function Campaigns() {
           </Dialog>
         }
       />
+      <form
+        className="mb-6 flex flex-wrap gap-3"
+        action={async (form) => {
+          const { error } = await createClient()!.rpc("join_campaign", {
+            code: String(form.get("code")).trim(),
+          });
+          if (error) toast.error(error.message);
+          else {
+            toast.success("Você entrou na campanha");
+            void load();
+          }
+        }}
+      >
+        <Input
+          name="code"
+          aria-label="Código do convite"
+          placeholder="Código do convite"
+          required
+          maxLength={64}
+          className="max-w-xs"
+        />
+        <Button type="submit" variant="outline">
+          Entrar na campanha
+        </Button>
+      </form>
       {items.length ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {items.map((item) => (
@@ -137,7 +178,17 @@ export function Campaigns() {
               <span className="grid size-11 place-items-center rounded-xl bg-cyan-400/10 text-cyan-300">
                 <Castle />
               </span>
-              <h2 className="mt-5 font-serif text-2xl">{item.name}</h2>
+              <h2 className="mt-5 font-serif text-2xl">
+                <Link href={`/campanhas/${item.id}`}>{item.name}</Link>
+              </h2>
+              <p className="mt-2 text-sm text-violet-300">
+                {item.system_key === "organization"
+                  ? "A Organização"
+                  : "Shadow Slave"}
+              </p>
+              <Button asChild className="mt-4">
+                <Link href={`/campanhas/${item.id}`}>Abrir campanha</Link>
+              </Button>
               <p className="mt-2 min-h-12 text-sm leading-6 text-zinc-500">
                 {item.description || "Sem descrição."}
               </p>
@@ -147,18 +198,21 @@ export function Campaigns() {
                   Campanha ativa
                 </span>
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-white/[.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
-                    onClick={() =>
-                      void navigator.clipboard
-                        .writeText(item.invite_code)
-                        .then(() => toast.success("Código copiado"))
-                    }
-                  >
-                    <KeyRound size={15} />
-                    {item.invite_code}
-                  </button>
+                  {(item.owner_id === user?.id ||
+                    profile?.role === "admin") && (
+                    <button
+                      type="button"
+                      className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-white/[.05] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+                      onClick={() =>
+                        void navigator.clipboard
+                          .writeText(item.invite_code)
+                          .then(() => toast.success("Código copiado"))
+                      }
+                    >
+                      <KeyRound size={15} />
+                      {item.invite_code}
+                    </button>
+                  )}
                   {profile?.role === "admin" && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
@@ -177,9 +231,10 @@ export function Campaigns() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Excluir campanha?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            A campanha “{item.name}” será excluída permanentemente.
-                            As fichas continuarão existindo, mas deixarão de estar
-                            vinculadas a ela. Esta ação não pode ser desfeita.
+                            A campanha “{item.name}” será excluída
+                            permanentemente. As fichas continuarão existindo,
+                            mas deixarão de estar vinculadas a ela. Esta ação
+                            não pode ser desfeita.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>

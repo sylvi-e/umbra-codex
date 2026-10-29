@@ -196,7 +196,7 @@ const defaults: FormValues = {
   trueNameMeaning: "",
   trueNameEffect: "",
 };
-export function CharacterEditor({ characterId, kind = "player" }: { characterId?: string; kind?: "player" | "npc" }) {
+export function CharacterEditor({ characterId, kind = "player", campaignId }: { characterId?: string; kind?: "player" | "npc"; campaignId?: string }) {
   const router = useRouter();
   const isNpc = kind === "npc";
   const basePath = isNpc ? "/npcs" : "/fichas";
@@ -424,7 +424,7 @@ export function CharacterEditor({ characterId, kind = "player" }: { characterId?
       } else {
         const { data, error } = await client
           .from("character_sheets")
-          .insert({ ...sheet, owner_id: user.id, is_npc: isNpc })
+          .insert({ ...sheet, owner_id: user.id, is_npc: isNpc, campaign_id: campaignId })
           .select("id")
           .single();
         if (error) throw error;
