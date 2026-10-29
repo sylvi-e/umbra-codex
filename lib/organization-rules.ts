@@ -104,3 +104,40 @@ export const organizationDefaults: OrganizationSheet = {
   initialWeaponAbilities: "",
   notes: "",
 };
+
+export type OrganizationCombatKey =
+  | "hp"
+  | "tempHp"
+  | "hpBase"
+  | "mana"
+  | "manaBase"
+  | "armor"
+  | "armorBonus"
+  | "mr"
+  | "mrBonus"
+  | "movementBase";
+export function applyOrganizationCombatChange(
+  sheet: OrganizationSheet,
+  key: OrganizationCombatKey,
+  value: number,
+): OrganizationSheet {
+  const next = {
+    ...sheet,
+    [key]: Math.min(
+      1000000000,
+      Math.max(0, Number.isFinite(value) ? value : 0),
+    ),
+  };
+  const totals = organizationTotals(
+    next.attributes,
+    next.hpBase,
+    next.manaBase,
+    next.movementBase,
+    next.backpackSlots,
+  );
+  return {
+    ...next,
+    hp: Math.min(totals.hp, next.hp),
+    mana: Math.min(totals.mana, next.mana),
+  };
+}
