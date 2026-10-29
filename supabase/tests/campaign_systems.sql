@@ -7,7 +7,7 @@ do $$ begin
 end $$;
 set local role authenticated;
 select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000001',true);
-do $$ declare c uuid; n uuid; p uuid; payload jsonb := '{"attributes":[13,10,10,10,0,0],"hp":20,"hpBase":10,"mana":15,"manaBase":10,"movementBase":9,"armor":1,"armorBonus":1,"mr":0,"mrBonus":0,"money":713,"percentage":50,"backpackSlots":0,"items":[],"abilities":[]}'::jsonb; begin
+do $$ declare c uuid; n uuid; p uuid; payload jsonb := '{"attributes":[13,10,10,10,0,0],"hp":20,"hpBase":10,"mana":15,"manaBase":10,"movementBase":9,"armor":1,"armorBonus":1,"mr":0,"mrBonus":0,"money":713,"percentage":50,"backpackSlots":0,"items":[],"abilities":[],"tempHp":5,"portraitUrl":"test/portrait.webp","customAttributes":[{"id":"extra","label":"Sorte","base":4,"notes":"&aVerde"}]}'::jsonb; begin
  insert into public.campaigns(owner_id,name,system_key) values(auth.uid(),'Organization test','organization') returning id into c;
  perform set_config('test.campaign',c::text,true);
  perform set_config('test.code',(select invite_code from public.campaigns where id=c),true);
@@ -18,6 +18,8 @@ do $$ declare c uuid; n uuid; p uuid; payload jsonb := '{"attributes":[13,10,10,
  if not exists(select 1 from public.character_stats where character_id=n and stat_key='hp' and max_value=20) then raise exception 'HP upgrade failed'; end if;
  p:=public.save_organization_character(null,c,'Owner character',23,false,payload);
  perform set_config('test.owner_character',p::text,true);
+ if not exists(select 1 from public.character_sheets where id=p and portrait_url='test/portrait.webp' and organization_data->'customAttributes'->0->>'label'='Sorte') then raise exception 'Portrait or custom attributes lost'; end if;
+ if not exists(select 1 from public.character_stats where character_id=p and stat_key='hp' and temporary_bonus=5) then raise exception 'Temporary HP not saved'; end if;
  if public.duplicate_character(p) is null then raise exception 'Duplication failed'; end if;
  begin
   update public.campaigns set system_key='shadow_slave' where id=c;
@@ -25,7 +27,7 @@ do $$ declare c uuid; n uuid; p uuid; payload jsonb := '{"attributes":[13,10,10,
  exception when raise_exception then if sqlerrm='System switch allowed' then raise; end if; end;
 end $$;
 select set_config('request.jwt.claim.sub','10000000-0000-0000-0000-000000000003',true);
-do $$ declare c uuid:=current_setting('test.campaign')::uuid; payload jsonb := '{"attributes":[0,0,0,0,0,0],"hp":10,"hpBase":10,"mana":10,"manaBase":10,"movementBase":9,"armor":0,"armorBonus":0,"mr":0,"mrBonus":0,"money":0,"percentage":50,"backpackSlots":0,"items":[],"abilities":[]}'::jsonb; p uuid; begin
+do $$ declare c uuid:=current_setting('test.campaign')::uuid; payload jsonb := '{"attributes":[0,0,0,0,0,0],"hp":10,"hpBase":10,"mana":10,"manaBase":10,"movementBase":9,"armor":0,"armorBonus":0,"mr":0,"mrBonus":0,"money":0,"percentage":50,"backpackSlots":0,"items":[],"abilities":[],"tempHp":5,"portraitUrl":"test/portrait.webp","customAttributes":[{"id":"extra","label":"Sorte","base":4,"notes":"&aVerde"}]}'::jsonb; p uuid; begin
  if exists(select 1 from public.campaigns where id=c) then raise exception 'Outsider sees campaign'; end if;
  perform public.join_campaign(current_setting('test.code'));
  perform public.join_campaign(current_setting('test.code'));
