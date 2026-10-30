@@ -192,13 +192,13 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
           total={sheet.armor + sheet.armorBonus}
         >
           <ResourceInput
-            label="Base" accessibleLabel="CA base"
+            label="Base" accessibleLabel="CA base" allowNegative
             tone="blue"
             value={sheet.armor}
             onChange={(v) => update("armor", v)}
           />
           <ResourceInput
-            label="Equipamentos" accessibleLabel="CA dos equipamentos"
+            label="Equipamentos" accessibleLabel="CA dos equipamentos" allowNegative
             tone="blue"
             value={sheet.armorBonus}
             onChange={(v) => update("armorBonus", v)}
@@ -212,13 +212,13 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
           total={sheet.mr + sheet.mrBonus}
         >
           <ResourceInput
-            label="Base" accessibleLabel="MR base"
+            label="Base" accessibleLabel="MR base" allowNegative
             tone="violet"
             value={sheet.mr}
             onChange={(v) => update("mr", v)}
           />
           <ResourceInput
-            label="Equipamentos" accessibleLabel="MR dos equipamentos"
+            label="Equipamentos" accessibleLabel="MR dos equipamentos" allowNegative
             tone="violet"
             value={sheet.mrBonus}
             onChange={(v) => update("mrBonus", v)}
@@ -240,13 +240,14 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
     </fieldset>
   );
 }
-function ResourceInput({ label, accessibleLabel, value, onChange, tone = "rose", hint }: {
+function ResourceInput({ label, accessibleLabel, value, onChange, tone = "rose", hint, allowNegative = false }: {
   label: string;
   accessibleLabel?: string;
   value: number;
   onChange: (v: number) => void;
   tone?: "rose" | "violet" | "blue" | "amber";
   hint?: string;
+  allowNegative?: boolean;
 }) {
   const name = accessibleLabel ?? label;
   return (
@@ -254,8 +255,8 @@ function ResourceInput({ label, accessibleLabel, value, onChange, tone = "rose",
       <div className={`flex flex-wrap items-center justify-between gap-2 ${{ rose: "text-rose-300", violet: "text-violet-300", blue: "text-sky-300", amber: "text-amber-300" }[tone]}`}>
         <span className="text-sm">{label}</span>
         <div className="inline-flex shrink-0 items-center overflow-hidden rounded-xl border border-current/20 bg-black/20">
-          <Button type="button" variant="ghost" size="icon" className="rounded-none text-inherit hover:bg-white/10 hover:text-white" aria-label={`Diminuir ${name} em 1`} disabled={value <= 0} onClick={() => onChange(Math.max(0, value - 1))}><Minus /></Button>
-          <Input aria-label={name} type="number" min={0} className="h-9 w-16 rounded-none border-0 bg-transparent px-1 text-center font-bold tabular-nums text-white shadow-none [appearance:textfield] focus-visible:ring-inset [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" value={value} onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))} />
+          <Button type="button" variant="ghost" size="icon" className="rounded-none text-inherit hover:bg-white/10 hover:text-white" aria-label={`Diminuir ${name} em 1`} disabled={!allowNegative && value <= 0} onClick={() => onChange(allowNegative ? value - 1 : Math.max(0, value - 1))}><Minus /></Button>
+          <Input aria-label={name} type="number" min={allowNegative ? undefined : 0} className="h-9 w-16 rounded-none border-0 bg-transparent px-1 text-center font-bold tabular-nums text-white shadow-none [appearance:textfield] focus-visible:ring-inset [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" value={value} onChange={(e) => onChange(allowNegative ? Number(e.target.value) || 0 : Math.max(0, Number(e.target.value) || 0))} />
           <Button type="button" variant="ghost" size="icon" className="rounded-none text-inherit hover:bg-white/10 hover:text-white" aria-label={`Aumentar ${name} em 1`} onClick={() => onChange(value + 1)}><Plus /></Button>
         </div>
       </div>
@@ -289,4 +290,3 @@ function Metric({ label, description, icon: Icon, tone, total, onAdjust, childre
     </section>
   );
 }
-

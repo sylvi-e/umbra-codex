@@ -1,0 +1,1113 @@
+[
+  {
+    "name": "Assassino",
+    "weapons": "qualquer tipo de adagas, utilitarios de nivel 3, qualquer arma de arremesso, qualquer arma com corda extensora, katana, espada curta. pode escolher uma arma branca ou outras para poder equipar",
+    "description": "Assassinos são ótimos em matar criaturas pequenas. São conhecidos por causarem um dano poderoso rapido, tendo uma grande maestria em furtividade",
+    "status": "+2 em danos, +2 em testes de furtividade, -1 de CA",
+    "tiers": [
+      {
+        "percentage": 50,
+        "abilities": [
+          {
+            "name": "Golpe Escondido (passivo)",
+            "description": "1 vez por alvo, sempre que acertar um ataque surpresa no alvo, causa um dano critico.",
+            "subclass": ""
+          },
+          {
+            "name": "Teletransporte (ativo) gasta 2 de mana / gasta ação bônus",
+            "description": "se teletransporta para um local em até 12m (80% = 24m, 100% = 32m).",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 60,
+        "abilities": [
+          {
+            "name": "Destreza Superior (passivo)",
+            "description": "pode usar as ações Desengajar, Correr ou tentar se esconder, como uma ação bônus.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 70,
+        "abilities": [
+          {
+            "name": "Ataque Ágil (passivo)",
+            "description": "seus ataques causam metade do dano como dano adicional.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 80,
+        "abilities": [
+          {
+            "name": "Passo Sombrio (passivo)",
+            "description": "Recebe uma ação bônus extra.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 90,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 100,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      }
+    ],
+    "subclasses": []
+  },
+  {
+    "name": "Assinante de Pacto",
+    "weapons": "é com base no pacto feito. pode escolher uma arma branca ou outras para poder equipar.\n(Utilitários nivel 3)",
+    "description": "Uma forma de receber um grande dom, é fazendo pactos. Estes pactos são feitos com uma das cristuas que foram contidas na organização. Pactos, porém são perigosos de serem feitos, sempre os dois lados devem dar algo. Os poderes do agente são baseados no pacto feito. Normalmente assinantes de pactos são atacantes consistentes",
+    "status": "+4 de vida, +5 de mana, -2 de deslocamento",
+    "tiers": [
+      {
+        "percentage": 50,
+        "abilities": [
+          {
+            "name": "Vínculo Sobrenatural (passivo)",
+            "description": "possui uma entidade vinculada, que oferece seus poderes para o agente via um pacto.",
+            "subclass": ""
+          },
+          {
+            "name": "Sacrifício Controlado (ativo) não gasta ação",
+            "description": "Perde vida para ganhar poder temporário, para a sua próxima ação. A cada 1 (até  3, 80% = 4, 100% = 5) de vida perdido aumenta em 1 os danos mágicos. Sempre que uma habilidade for aprimorada desta forma, tem chances sempre de ter efeitos adicionais que possam causar (corrupção, drenagem, distorção) no alvo.",
+            "subclass": ""
+          },
+          {
+            "name": "Habilidade de Patrono I",
+            "description": "Recebe uma habilidade do patrono escolhido. Quando uma habilidade é escolhida, não é possível trocar para outro patrono até o fim de uma \"cena\".",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 60,
+        "abilities": [
+          {
+            "name": "Habilidade de Patrono II",
+            "description": "Recebe uma habilidade do patrono escolhido. Quando uma habilidade é escolhida, não é possível trocar para outro patrono até o fim de uma \"cena\".",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 70,
+        "abilities": [
+          {
+            "name": "Habilidade de Patrono III",
+            "description": "Recebe uma habilidade do patrono escolhido. Quando uma habilidade é escolhida, não é possível trocar para outro patrono até o fim de uma \"cena\".",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 80,
+        "abilities": [
+          {
+            "name": "Manifestação Parcial (ativo)",
+            "description": "Invoca pequena \"parte\" do próprio patrono, para atacar.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 90,
+        "abilities": []
+      },
+      {
+        "percentage": 100,
+        "abilities": []
+      }
+    ],
+    "subclasses": [
+      {
+        "name": "Manto amarelo antigo",
+        "description": "Manto amarelo antigo (patrono Controle e caos)\nCondição do pacto: (decidida com o mestre)\nFraqueza: Pequena chance de falha ou efeito inesperado ao usar habilidades",
+        "tiers": [
+          {
+            "percentage": 50,
+            "abilities": [
+              {
+                "name": "Toque do Desconhecido (passivo)",
+                "description": "Seus ataques podem aplicar qualquer tipo de efeito, negativos ou positivos. (os efeitos são: )",
+                "subclass": ""
+              },
+              {
+                "name": "Mente Fragmentada (passivo)",
+                "description": "É imune a controle mentais ou ataques mentais.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 60,
+            "abilities": [
+              {
+                "name": "Manifestação Aberrante (ativo) 1 vez por combate",
+                "description": "Invoca parte da entidade para atacar de forma caótica.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 70,
+            "abilities": [
+              {
+                "name": "Manipulação da Sorte (ativo) 1 vez por descanso longo",
+                "description": "consegue manipular qualquer dado que tenha sido jogado e mudar seu valor para um valor desejado. E outros eventos podem ser ligeiramente manipulados.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 80,
+            "abilities": [
+              {
+                "name": "Rasgo Dimensional (ativo) Gasta 5 de mana",
+                "description": "Abre um rasgo rápido na realidade que puxa até 1 coisa próxima e um rasgo no local de saída, vai até 20m de distancia. Pode ser usado em seres vivos de até médio porte.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 90,
+            "abilities": [
+              {
+                "name": "Peculiaridade do Caminho",
+                "description": "Habilidade baseada no próprio personagem.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 100,
+            "abilities": [
+              {
+                "name": "Peculiaridade do Caminho",
+                "description": "Habilidade baseada no próprio personagem.",
+                "subclass": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Fada Vermelha",
+        "description": "Fada Vermelha (patrono Vampirismo e carne)\nCondição do pacto: Todo o sangue usado, pelo bruxo vem uma pequena quantidade para o patrono",
+        "tiers": [
+          {
+            "percentage": 50,
+            "abilities": [
+              {
+                "name": "Ciclo de Sangue (passivo)",
+                "description": "O dano de seus ataques mágicos curam o agente. (cura = metade do dado base de dano)",
+                "subclass": ""
+              },
+              {
+                "name": "Poder pelo Sofrimento (passivo)",
+                "description": "Quanto menor a vida, maior é o dano. (aumento de dano = metade da vida perdida arredondado para baixo)",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 60,
+            "abilities": [
+              {
+                "name": "Transferência Vital (ativo)",
+                "description": "transfere um pouco de seu sangue para um alvo, deve tocar no alvo.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 70,
+            "abilities": [
+              {
+                "name": "Sanguinário (passivo)",
+                "description": "Toda vez que matar ou dar assistência na morte de uma criatura VIVA, recebe 2 (80% = 4, 100% = 6) de mana e 2 (80% = 4, 100% = 6) de vida.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 80,
+            "abilities": [
+              {
+                "name": "Pacto de Sobrevivência (ativo)",
+                "description": "Impede morte por um curto período, mas cobra grande custo depois.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 90,
+            "abilities": [
+              {
+                "name": "Peculiaridade do Caminho",
+                "description": "Habilidade baseada no próprio personagem.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 100,
+            "abilities": [
+              {
+                "name": "Peculiaridade do Caminho",
+                "description": "Habilidade baseada no próprio personagem.",
+                "subclass": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Sombra Viva",
+        "description": "Sombra Viva (patrono sombras e assassinato)\nCondição do pacto: (decidida com mestre)\nFraqueza: Ambientes muito iluminados reduzem seu dano e furtividade, aplica desvantagem",
+        "tiers": [
+          {
+            "percentage": 50,
+            "abilities": [
+              {
+                "name": "Olhos da Penumbra (passivo)",
+                "description": "Enxerga perfeitamente no escuro.",
+                "subclass": ""
+              },
+              {
+                "name": "Corpo Sombrio (passivo)",
+                "description": "Ao andar por uma sombra ou local escuro, recebe uma ação de movimento adicional. passar por um local iluminado cancela a ação de movimento adicional.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 60,
+            "abilities": [
+              {
+                "name": "Caminhar nas Sombras (ativo) Gasta 5 de mana / gasta ação de movimento",
+                "description": "Teletransporta para uma sombra em até 12m (80% = 14m, 100% = 16m). Mas é necessário estar em uma sombra antes do teletransporte.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 70,
+            "abilities": [
+              {
+                "name": "Véu Sombrio (ativo) Gasta 4 de mana",
+                "description": "Se torna invisível por até 3 turnos, se revela ao atacar ou usar uma habilidade. Se a habilidade for usada durante a noite, não gasta mana.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 80,
+            "abilities": [
+              {
+                "name": "Dissolução Sombria (passivo)",
+                "description": "Quando causar qualquer dano sem ser percebido, causa +2 (100% = 6) de dano magico. Se estiver de noite, causa +6 (100% = 10) de dano magico.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 90,
+            "abilities": [
+              {
+                "name": "Peculiaridade do Caminho",
+                "description": "Habilidade baseada no próprio personagem.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 100,
+            "abilities": [
+              {
+                "name": "Peculiaridade do Caminho",
+                "description": "Habilidade baseada no próprio personagem.",
+                "subclass": ""
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Atirador",
+    "weapons": "qualquer arma de fogo, utilitários de nível 4, pode escolher uma arma branca ou outras para poder equipar",
+    "description": "É muito poderoso contra criaturas de alto poder, é um se não, o maior poder de ataque que uma equipe costuma ter. Porém é extremamente fraco de perto e frágil",
+    "status": "+2 em danos a distancia, +2 de acerto a distancia, -1 de CA base",
+    "tiers": [
+      {
+        "percentage": 50,
+        "abilities": [
+          {
+            "name": "Disparo Rápido (ativo) Recarga: 3 / não gasta ação",
+            "description": "Seu próximo ataque tem acerto garantido. Porém o alvo deve estar a pelo menos 2m de distancia do agente.",
+            "subclass": ""
+          },
+          {
+            "name": "Visão Ampliada (passivo)",
+            "description": "Aumenta alcance de visão em 30m e distância efetiva de ataque com armas de fogo em 10m.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 60,
+        "abilities": [
+          {
+            "name": "Rajada Intensa (ativo) Recarga: 4",
+            "description": "Usando uma arma de fogo automática ou semiautomática, pode disparar contra até 5 diferentes alvo no seu alcance, porém causa metade do dano.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 70,
+        "abilities": [
+          {
+            "name": "Foco Absoluto (passivo)",
+            "description": "Quanto mais tempo mirar no mesmo alvo, maior a precisão e o dano. A cada turno mirando em um alvo, aumenta o seu dano em 4 (80% = 8, 100% = 10) e seu acerto em 2 (80% = 3, 100% = 4), contra o alvo.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 80,
+        "abilities": [
+          {
+            "name": "Quebra Tanques (passivo)",
+            "description": "Ao encarar um alvo de grande porte (), seus tiros contra o alvo ultrapassam CA.",
+            "subclass": ""
+          },
+          {
+            "name": "Fragilidade Extrema (passivo)",
+            "description": "Recebe +2 de dano de ataques corpo a corpo.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 90,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 100,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      }
+    ],
+    "subclasses": []
+  },
+  {
+    "name": "Caçador",
+    "weapons": "espada curta, lança, Qualquer tipo de arco e bestas, Qualquer tipo de arma a distancia sem ser de fogo, Utilitarios de nivel 5, pistolas básicas. pode escolher uma arma branca ou outras para poder equipar",
+    "description": "è fortemente recomendado em equipes de busca ou perseguição. Grande desempenho para matar alvos sem dizer sua posição",
+    "status": "+2 em acertos, +2 em deslocamento",
+    "tiers": [
+      {
+        "percentage": 50,
+        "abilities": [
+          {
+            "name": "Rastreador Natural (passivo)",
+            "description": "Consegue detectar rastros recentes de inimigos (pegadas, cheiro, distúrbios no ambiente).",
+            "subclass": ""
+          },
+          {
+            "name": "Leitura de Presa (passivo)",
+            "description": "Após observar um alvo por 1 turno, ganha +2 (60% = 4, 80% = 6, 100% = 8) de dano e +2 (80% = 3, 100% = 4) de acerto contra ele.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 60,
+        "abilities": [
+          {
+            "name": "Instinto de Sobrevivência (passivo)",
+            "description": "Recebe um alerta mental ao ser alvo de ataque surpresa. Assim pode se defender.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 70,
+        "abilities": [
+          {
+            "name": "Preparo Rápido (ativo) 2 vezes por combate",
+            "description": "Consegue armar uma armadilha completa, apenas por andar perto do local alvo. Ninguém consegue perceber a armadilha, além de aliados.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 80,
+        "abilities": [
+          {
+            "name": "Precisão fria (passivo)",
+            "description": "Se possuir vantagem contra um alvo, transforma esta vantagem em um acerto critico garantido.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 90,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 100,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      }
+    ],
+    "subclasses": []
+  },
+  {
+    "name": "Espadachim",
+    "weapons": "qualquer tipo de espada, katana, escudos intermediários, utilitarios de nivel 1, armadura até nivel 3. pode escolher uma arma branca ou outras para poder equipar",
+    "description": "Uma função com grande consistência e muito bem preparada para combates diretos. Consegue se acostumar com o local de combate facilmente",
+    "status": "+5 de vida, +1 de CA natural",
+    "tiers": [
+      {
+        "percentage": 50,
+        "abilities": [
+          {
+            "name": "Postura Sólida (passivo)",
+            "description": "Reduz dano recebido de ataques frontais (inimigo que esta na sua frente) em 1 (70% = 2, 100% = 3).",
+            "subclass": ""
+          },
+          {
+            "name": "Adaptação de Combate (passivo)",
+            "description": "Após 1 turno que estiver em um ambiente de combate de alguma forma DESVANTAJOSA (ambiente que provoque desvantagens), o agente se acostuma com o lugar e não sofre mais penalidades.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 60,
+        "abilities": [
+          {
+            "name": "Corte Preciso (passivo)",
+            "description": "Ao girar um dado de dano, se o resultado for mais que a metade do dado, causa um adicional de 2 (80% = 3, 100% = 4) de dano.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 70,
+        "abilities": [
+          {
+            "name": "Defesa Instantânea (ativo) 1 (100% = 2) vez por combate",
+            "description": "Bloqueia ou reduz drasticamente um ataque recebido . Pode ser usado a qualquer momento.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 80,
+        "abilities": [
+          {
+            "name": "Segundo Folego (ativo) 1 vez por combate",
+            "description": "Seu corpo é revitalizado por uma brisa de vento. Por 3 turnos, o usuário cura ao total metade da sua vida arredondado para baixo.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 90,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 100,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      }
+    ],
+    "subclasses": []
+  },
+  {
+    "name": "Glacinata",
+    "weapons": "espada reta, qualquer arma contundente, machados, escudos de alto nivel, Disco de aprimoramento mais capaz, armadura até nivel 3, utilitarios de nivel 1. pode escolher uma arma branca ou outras para poder equipar",
+    "description": "É uma linha de frente quase impenetrável, pode aguentar grandes quantidades de peso e ataques inimigos. É muito bom para aguentar até a equipe estar pronta",
+    "status": "+10 de vida, +1 de CA natural, -2 de deslocamento base",
+    "tiers": [
+      {
+        "percentage": 50,
+        "abilities": [
+          {
+            "name": "Corpo Glacial (passivo)",
+            "description": "Reduz qualquer TIPO de dano em 1 (80% = 2, 100% = 3).",
+            "subclass": ""
+          },
+          {
+            "name": "Inabalável (passivo)",
+            "description": "É imune a empurrões e possui grande resistência a atordoamento.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 60,
+        "abilities": [
+          {
+            "name": "Escudo de Cristal (ativo)",
+            "description": "Concede algo alvo (poder ser usado em si mesmo), um escudo que protege até 4 (80% = 6, 100% = 8) de dano.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 70,
+        "abilities": [
+          {
+            "name": "Recuperação Lenta (passivo)",
+            "description": "Seu corpo aprende a como se auto curar de forma mais eficiente. A cada turno cura 1 (80% = 2, 100% = 3) de vida. funciona fora de combate.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 80,
+        "abilities": [
+          {
+            "name": "Vitalidade Congelada (ativo) 1 vez por combate",
+            "description": "Todas as veias do seu corpo são congeladas, deixando apenas seu próprio sangue fluir. Congela sua vida verdadeira, recebe uma vida de gelo que é equivalente a metade da sua vida máxima. Qualquer ataque que acerte a vida do usuário, acertará a vida de gelo.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 90,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 100,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      }
+    ],
+    "subclasses": []
+  },
+  {
+    "name": "Lutador",
+    "weapons": "qualquer arma do tipo manopla, utilitários de nível 3, armadura nível 1, qualquer tipo de pistola. Pode equipar qualquer tipo de armas brancas. pode escolher uma arma branca ou outras para poder equipar",
+    "description": "É altamente capaz de enfrentar qualquer um com qualquer tipo de arma branca, se for um duelista, e pode enfrentar sem ter armas equipadas se for um pugilista. Muito útil para completar qualquer pendencia na equipe",
+    "status": "+5 de vida, +2 deslocamento",
+    "tiers": [
+      {
+        "percentage": 50,
+        "abilities": [
+          {
+            "name": "Equilíbrio Perfeito (passivo)",
+            "description": "É imune a atordoamentos.",
+            "subclass": ""
+          },
+          {
+            "name": "Combo Natural (passivo) (Pugilista)",
+            "description": "Quando estiver batendo usando as mãos (inclui manoplas ou luvas), sempre bate com as duas mão de uma vez.",
+            "subclass": "Pugilista"
+          },
+          {
+            "name": "Técnica Refinada (passivo) (Duelista)",
+            "description": "Recebe +1 no dado NATURAL para acerto, diminui o critico necessário de 20, para 18.",
+            "subclass": "Duelista"
+          }
+        ]
+      },
+      {
+        "percentage": 60,
+        "abilities": [
+          {
+            "name": "Fluxo de Combate (passivo) (Pugilista)",
+            "description": "A cada rodada, recebe aprimoramentos. (todos acumulam até 2 (80% = 3, 100% = 4) ), +1 em acertos corpo a corpo, +1 de deslocamento, +1 em esquivas.",
+            "subclass": "Pugilista"
+          },
+          {
+            "name": "Leitura de Estilo (passivo) (Duelista)",
+            "description": "Consegue identificar habilidades e padrões de ataques, assim prevendo ataques do inimigo e descobrindo suas habilidades. Isso acontece NORMALMENTE depois de ver ao menos 1 a 2 vezes a habilidade.",
+            "subclass": "Duelista"
+          }
+        ]
+      },
+      {
+        "percentage": 70,
+        "abilities": [
+          {
+            "name": "Guarda Fechada (ativo) (Pugilista) Recarga: 3",
+            "description": "Durante 2 turnos, causa -2 (80% = -3, 100% = -4) de dano, mas recebe -2 (80% = -3, 100% = -4) de dano físico.",
+            "subclass": "Pugilista"
+          },
+          {
+            "name": "Aparar (método de defesa) (duelista)",
+            "description": "Reduz o dano em (Diferença do teste / 2), arredondando para baixo. Depois disso aplica armadura normalmente. (não existe lado vencedor)",
+            "subclass": "Duelista"
+          }
+        ]
+      },
+      {
+        "percentage": 80,
+        "abilities": [
+          {
+            "name": "Corpo de Aço (passivo)",
+            "description": "Se não estiver com uma armadura ou qualquer armamento do peito, recebe +2 de CA.",
+            "subclass": ""
+          },
+          {
+            "name": "Domínio da Arma (passivo) (Duelista)",
+            "description": "Ignora metade da CA dos inimigos",
+            "subclass": "Duelista"
+          }
+        ]
+      },
+      {
+        "percentage": 90,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 100,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      }
+    ],
+    "subclasses": [
+      {
+        "name": "Pugilista",
+        "description": "",
+        "tiers": []
+      },
+      {
+        "name": "Duelista",
+        "description": "",
+        "tiers": []
+      }
+    ]
+  },
+  {
+    "name": "Manipulador de Energia",
+    "weapons": "só não consegue usar armas de fogo. pode escolher uma arma branca ou outras para poder equipar",
+    "description": "Aquele que nasceu com sorte, e recebeu um poder nato ao instalar a insignia. Manipuladores de energia, podem desempenhar funções muito versateis com base no seu poder nato",
+    "status": "Com base na criação do personagem, recebe atributos de acordo",
+    "tiers": [
+      {
+        "percentage": 50,
+        "abilities": [
+          {
+            "name": "Espirito Poderoso (passivo)",
+            "description": "Seu espirito se fortalece com o tempo, assim modificando seu caminho além do 50%.",
+            "subclass": ""
+          },
+          {
+            "name": "Sobrecarga de Espirito (passivo)",
+            "description": "Ao usar muito as suas habilidades por períodos de tempo consecutivos, pode causa cansaço (estes períodos de tempo devem aumentar com base na progressão do personagem).",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 60,
+        "abilities": [
+          {
+            "name": "Espirito Poderoso I (???)",
+            "description": "habilidade feita com base no poder inato do usuário.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 70,
+        "abilities": [
+          {
+            "name": "Espirito Poderoso II (???)",
+            "description": "habilidade feita com base no poder inato do usuário.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 80,
+        "abilities": [
+          {
+            "name": "Espirito Poderoso III (???)",
+            "description": "habilidade feita com base no poder inato do usuário.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 90,
+        "abilities": [
+          {
+            "name": "Espirito Poderoso IV (???)",
+            "description": "habilidade feita com base no poder inato do usuário.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 100,
+        "abilities": [
+          {
+            "name": "Espirito Poderoso V (???)",
+            "description": "habilidade feita com base no poder inato do usuário.",
+            "subclass": ""
+          }
+        ]
+      }
+    ],
+    "subclasses": []
+  },
+  {
+    "name": "Manipulador de Magia",
+    "weapons": "qualquer tipo de catalizador magico, utilitarios de nivel 2, pode escolher uma arma branca ou outras para poder equipar",
+    "description": "Aquele que nasceu com sorte. Consegue manipular a mana ao seu redor, após instalar a insignia. Um mago pode desempenhar funções com base na sua especialidade escolhida, entre: poder de efeito, controle/suporte. Magos são muito uteis por suas varias opções",
+    "status": "-2 de vida, +10 de mana, -1 de CA",
+    "tiers": [
+      {
+        "percentage": 50,
+        "abilities": [
+          {
+            "name": "Fluxo Natural (passivo)",
+            "description": "Regenera 1 de mana a cada rodada. Não funciona tão bem fora de combate.",
+            "subclass": ""
+          },
+          {
+            "name": "Sensibilidade Arcana (passivo)",
+            "description": "Detecta fontes de mana, magia ativa e distúrbios mágicos.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 60,
+        "abilities": [
+          {
+            "name": "Controle Fino (passivo)",
+            "description": "Sua magia tem maior precisão ou efeito se for uma magia de controle/suporte. +2 (80% = 3, 100% = 4) de precisão, +2 (80% = 3, 100% = 4) em efeitos.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 70,
+        "abilities": [
+          {
+            "name": "Expansão das Veias de Mana (ativo) 1 vez por combate / não gasta ação",
+            "description": "Sua próxima habilidade magica, não gasta mana.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 80,
+        "abilities": [
+          {
+            "name": "Afinidade Superior (passivo)",
+            "description": "reduz o custo de qualquer magia em 2 (100% = 4).",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 90,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 100,
+        "abilities": [
+          {
+            "name": "Peculiaridade do Caminho",
+            "description": "Habilidade baseada no próprio personagem.",
+            "subclass": ""
+          }
+        ]
+      }
+    ],
+    "subclasses": [
+      {
+        "name": "Poder de Efeito",
+        "description": "",
+        "tiers": [
+          {
+            "percentage": 50,
+            "abilities": [
+              {
+                "name": "Lança de Gelo (ativo) gasta 4 de mana",
+                "description": "Dispara uma lança de gelo que perfura até 1 inimigo. Causa 1d4 +INTG de dano magico.",
+                "subclass": ""
+              },
+              {
+                "name": "Zap (ativo) gasta 2 de mana",
+                "description": "Dispara um pequeno e fino raio no alvo, acerto garantido. Causa 1d4 +INTG de dano magico.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 60,
+            "abilities": [
+              {
+                "name": "Lâmina Etérea (ativo) Gasta 3 de mana / Exige Concentração",
+                "description": "Aprimora uma arma branca com magia arcana. Elas causam 2 +INTG do alvo de dano magico adicional.",
+                "subclass": ""
+              },
+              {
+                "name": "Voo (ativo) gasta 1 de mana a cada turno ativado / Exige Concentração",
+                "description": "Consegue voar e levitar até 6m (80% = 8m, 100% = 10m) do chão.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 70,
+            "abilities": [
+              {
+                "name": "Blink (ativo) Gasta 5 de mana / 1 vez por Descanso",
+                "description": "Ao final de cada um dos seus turnos, você rola um d20. Se o resultado for 11 ou mais, você desaparece para o Plano Etéreo.",
+                "subclass": ""
+              },
+              {
+                "name": "Erupção Arcana (ativo) gasta 8 de mana / Recarga: 2 / alcance: 12m",
+                "description": "Conjura 3 erupções em 3 locais diferentes ou no mesmo local. Após 1 turnos da conjuração os locais Explodem em uma erupção. Cada Erupção causa 2d10 +INTG de dano Físico.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 80,
+            "abilities": [
+              {
+                "name": "Descarga Elétrica (ativo) gasta 12 de mana",
+                "description": "Dispara um raio que salta em inimigo por inimigo (até 3), causando dano em cadeia. Causa 3d8 +INTG de dano magico em cada inimigo.",
+                "subclass": ""
+              },
+              {
+                "name": "Bola de Fogo (ativo) gasta 15 de mana",
+                "description": "Dispara uma bola de fogo que causa 4d10 +INTG de dano magico de fogo. Explode em uma área em 5x5, a explosão causa 1d10 +metade da INTG de dano magico.",
+                "subclass": ""
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Controle/Suporte",
+        "description": "",
+        "tiers": [
+          {
+            "percentage": 50,
+            "abilities": [
+              {
+                "name": "Curar Ferimentos (ativo) Gasta 4 de mana",
+                "description": "Efetua uma cura no aliado alvo. Cura 1d4 (70% = 2d4, 80% = 3d4) +INTG .",
+                "subclass": ""
+              },
+              {
+                "name": "Prisão de Gelo (ativo) Gasta 4 de mana / Recarga 2 apenas quando o efeito da habilidade acabar",
+                "description": "Imobiliza um alvo de até médio porte por 1 turno. Se o alvo for de maior porte, corta pela metade seu deslocamento pela mesma duração.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 60,
+            "abilities": [
+              {
+                "name": "Barreira Arcana (ativo) gasta 2 de mana / Exige Concentração",
+                "description": "Conjura uma barreira magica no aliado alvo. A barreira aguenta até 4 (80% = 6, 100% = 8) de dano magico ou 2 (80% = 4, 100% = 6) de dano fisico, só pode ser conjurada em um aliado por vez.",
+                "subclass": ""
+              },
+              {
+                "name": "Distorção de espaço (ativo) Gasta 5 de mana (gasta ação bonus) / alcance 20m",
+                "description": "pode Diminuir ou aumentar o espaçamento de um ponto ao outro. O escalonamento de aumentar ou diminuir, é baseado no VALOR de INTG x2 do usuário.",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 70,
+            "abilities": [
+              {
+                "name": "Fluxo de Mana (ativo) Gasta 4 de mana / 1 vez por combate",
+                "description": "Reúne a mana de todos os aliados (inclui de de sigo mesmo) e redistribui da forma desejada. Isso pode Deixar com efeitos de Tontura ou exaustão leve temporariamente.",
+                "subclass": ""
+              },
+              {
+                "name": "Muralha Elemental (ativo) Gasta 4 de mana",
+                "description": "Conjura uma barreira de até 3m de altura e 2m de largura. O elemento da barreira é decidido pelo conjurador (opções: Pedra, Chamas ou Gelo)",
+                "subclass": ""
+              }
+            ]
+          },
+          {
+            "percentage": 80,
+            "abilities": [
+              {
+                "name": "Remoção de Efeitos (ativo) gasta 2 de mana, aumenta em 2 o custo a cada uso até o fim do combate",
+                "description": "Remove qualquer efeitos positivos ou negativos do alvo (inimigo ou aliado).",
+                "subclass": ""
+              },
+              {
+                "name": "Aceleração (ativo) Gasta 10 de mana / Recarga 3",
+                "description": "Concede uma ação extra para o alvo por 2 turnos.",
+                "subclass": ""
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Seguidor de Divinos",
+    "weapons": "qualquer catalizador magico, utilitarios de nivel 2, pode escolher uma arma branca para especialização",
+    "description": "Se torna um seguidor por interesse de um ser divino que existem, são seres que são estudados em livros, que podem ser criaturas mitológicas. Assim recebe poder magico com base no divino escolhido, certos divinos exigem certos modos",
+    "status": "A definir com o mestre.",
+    "tiers": [
+      {
+        "percentage": 50,
+        "abilities": [
+          {
+            "name": "Poderes do divino",
+            "description": "A definir com o mestre.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 60,
+        "abilities": [
+          {
+            "name": "Progressão",
+            "description": "A definir com o mestre.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 70,
+        "abilities": [
+          {
+            "name": "Progressão",
+            "description": "A definir com o mestre.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 80,
+        "abilities": [
+          {
+            "name": "Progressão",
+            "description": "A definir com o mestre.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 90,
+        "abilities": [
+          {
+            "name": "Progressão",
+            "description": "A definir com o mestre.",
+            "subclass": ""
+          }
+        ]
+      },
+      {
+        "percentage": 100,
+        "abilities": [
+          {
+            "name": "Progressão",
+            "description": "A definir com o mestre.",
+            "subclass": ""
+          }
+        ]
+      }
+    ],
+    "subclasses": []
+  }
+]

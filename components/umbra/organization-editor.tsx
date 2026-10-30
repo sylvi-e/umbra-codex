@@ -63,6 +63,7 @@ import {
   CharacterPortraitEditor,
   CharacterPortraitCard,
 } from "@/components/umbra/character-portrait";
+import { OrganizationClass } from "@/components/umbra/organization-class";
 import { OrganizationCombat } from "@/components/umbra/organization-combat";
 import {
   CharacterNotesBoard,
@@ -445,22 +446,15 @@ export function OrganizationEditor({
             <TabsContent value="progression">
               <SheetSection
                 title="Progressão do agente"
-                description="Classe e porcentagem de domínio. Os buffs são descritos nas habilidades."
+                description="Classe, subclasse e porcentagens do personagem."
               >
-                <div className="mb-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <Text
-                    label="Classe"
-                    value={sheet.className}
-                    onChange={(v) => update("className", v)}
-                  />
-                  <NumberField
-                    label="Porcentagem da classe (50–100%)"
-                    value={sheet.percentage}
-                    min={50}
-                    max={100}
-                    onChange={(v) => update("percentage", v)}
-                  />
-                </div>
+                <OrganizationClass sheet={sheet} readOnly={readOnly} onChange={(changes) => {
+                  setSheet((current) => {
+                    const next = { ...current, ...changes };
+                    combatSnapshot.current = next;
+                    return next;
+                  });
+                }} />
               </SheetSection>
             </TabsContent>
             <TabsContent
@@ -898,6 +892,7 @@ export function OrganizationEditor({
                       </Button>
                     )}
                   </div>
+                  {abilityGroup === "class" && <OrganizationClass sheet={sheet} mode="abilities" readOnly={readOnly} />}
                   <div className="space-y-2">
                     {sheet.abilities.map((ability) => (
                       <Dialog

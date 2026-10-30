@@ -27,6 +27,15 @@ do $$ declare c uuid; n uuid; p uuid; payload jsonb := '{"attributes":[13,10,10,
   perform public.update_organization_combat(p,'{"notes":"forbidden"}'::jsonb);
   raise exception 'Non-combat patch accepted';
  exception when raise_exception then if sqlerrm='Non-combat patch accepted' then raise; end if; end;
+ perform public.update_organization_combat(p,'{"armor":-4,"armorBonus":-2,"mr":-5,"mrBonus":-1}'::jsonb);
+ if not exists(select 1 from public.character_sheets where id=p and organization_data->>'armor'='-4' and organization_data->>'mr'='-5') then raise exception 'Negative defenses not persisted'; end if;
+ payload:=payload || '{"armor":-3,"mr":-2,"accustomedPercentage":60,"percentage":80,"className":"Lutador","subclass":"Duelista","classNotes":"Poder definido com o mestre"}'::jsonb;
+ perform public.save_organization_character(p,c,'Owner character',23,false,payload);
+ if not exists(select 1 from public.character_sheets where id=p and organization_data->>'subclass'='Duelista' and organization_data->>'accustomedPercentage'='60' and organization_data->>'armor'='-3') then raise exception 'Class metadata or negative defenses lost on save'; end if;
+ begin
+  perform public.update_organization_combat(p,'{"hp":-1}'::jsonb);
+  raise exception 'Negative HP accepted';
+ exception when raise_exception then if sqlerrm='Negative HP accepted' then raise; end if; end;
  if public.duplicate_character(p) is null then raise exception 'Duplication failed'; end if;
  begin
   update public.campaigns set system_key='shadow_slave' where id=c;

@@ -69,4 +69,9 @@ test("ajustes de combate mantêm limites e preservam os demais campos", () => {
   assert.equal(armor.armor + armor.armorBonus, 6);
   assert.equal(applyOrganizationCombatChange(initial, "mana", 99).mana, 10);
   assert.equal(applyOrganizationCombatChange(initial, "tempHp", 8).tempHp, 8);
+  for (const key of ["armor", "armorBonus", "mr", "mrBonus"]) {
+    assert.equal(applyOrganizationCombatChange(initial, key, -5)[key], -5);
+  }
+  assert.equal(applyOrganizationCombatChange(initial, "mana", -5).mana, 0);
+  assert.equal(initial.accustomedPercentage, 50);
 });

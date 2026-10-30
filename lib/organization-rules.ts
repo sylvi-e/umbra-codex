@@ -57,6 +57,9 @@ export type OrganizationSheet = {
   money: number;
   className: string;
   percentage: number;
+  accustomedPercentage: number;
+  subclass: string;
+  classNotes: string;
   hp: number;
   hpBase: number;
   mana: number;
@@ -85,6 +88,9 @@ export const organizationDefaults: OrganizationSheet = {
   money: 0,
   className: "",
   percentage: 50,
+  accustomedPercentage: 50,
+  subclass: "",
+  classNotes: "",
   hp: 10,
   hpBase: 10,
   mana: 10,
@@ -125,7 +131,7 @@ export function applyOrganizationCombatChange(
     ...sheet,
     [key]: Math.min(
       1000000000,
-      Math.max(0, Number.isFinite(value) ? value : 0),
+      Math.max(["armor", "armorBonus", "mr", "mrBonus"].includes(key) ? -1000000000 : 0, Number.isFinite(value) ? value : 0),
     ),
   };
   const totals = organizationTotals(
