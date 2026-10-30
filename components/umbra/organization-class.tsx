@@ -57,7 +57,7 @@ export function OrganizationClass({ sheet, readOnly = false, mode = "settings", 
         <label htmlFor={id} className="text-sm font-medium">Poderes personalizados e definições com o mestre</label>
         {readOnly ? <p className="whitespace-pre-wrap rounded-xl border border-white/10 p-4 text-sm text-zinc-300">{sheet.classNotes || "A definir com o mestre."}</p> : <textarea id={id} rows={6} className="w-full rounded-xl border border-white/10 bg-black/20 p-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400" placeholder="Registre peculiaridades de 90% e 100%, poderes inatos, patronos ou divinos personalizados e as regras combinadas com o mestre." value={sheet.classNotes} onChange={(event) => onChange?.({ classNotes: event.target.value })} />}
       </div>
-      <p className="text-sm text-zinc-400">Consulte as regras da classe na aba Habilidades. Os bônus são uma referência para ajuste manual da ficha.</p>
+      <p className="text-sm text-zinc-400">Consulte as regras em Habilidades → Porcentagem. Os bônus são uma referência para ajuste manual da ficha.</p>
     </div>
   );
 
@@ -78,7 +78,6 @@ export function OrganizationClass({ sheet, readOnly = false, mode = "settings", 
         </details>)}
       </div>
       {sheet.classNotes && <div className="rounded-xl border border-white/10 p-4"><h4 className="mb-2 text-sm font-semibold">Definições do personagem</h4><p className="whitespace-pre-wrap text-sm text-zinc-300">{sheet.classNotes}</p></div>}
-      <h3 className="pt-2 text-sm font-semibold text-zinc-300">Habilidades registradas na ficha</h3>
     </section>
   );
 }

@@ -29,6 +29,7 @@ const inventoryLocations = [
   ["cinto", "Cinto de poções"],
 ] as const;
 const abilityGroups = [
+  ["percentage", "Porcentagem"],
   ["class", "Classe"],
   ["extra", "Extra"],
 ] as const;
@@ -843,7 +844,7 @@ export function OrganizationEditor({
                     >
                       <span>{label}</span>
                       <span className="rounded-md bg-white/[.05] px-2 py-0.5 text-xs">
-                        {
+                        {key === "percentage" ? `${sheet.percentage}%` :
                           sheet.abilities.filter(
                             (ability) =>
                               abilityCategory(ability.origin) === key,
@@ -857,16 +858,21 @@ export function OrganizationEditor({
                   <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <h2 className="font-serif text-2xl">
-                        {abilityGroup === "class"
+                        {abilityGroup === "percentage"
+                          ? "Habilidades por Porcentagem"
+                          : abilityGroup === "class"
                           ? "Habilidades de Classe"
                           : "Habilidades Extras"}
                       </h2>
                       <p className="mt-1 text-sm text-zinc-500">
-                        Clique em uma habilidade para ver seus efeitos,
-                        condições e progressão.
+                        {abilityGroup === "percentage"
+                          ? "Habilidades e aprimoramentos das porcentagens da classe escolhida."
+                          : abilityGroup === "class"
+                            ? "Habilidades criadas pelo jogador para o personagem."
+                            : "Habilidades criadas pelo mestre para o personagem."}
                       </p>
                     </div>
-                    {!readOnly && (
+                    {!readOnly && abilityGroup !== "percentage" && (
                       <Button
                         type="button"
                         onClick={() => {
@@ -892,7 +898,7 @@ export function OrganizationEditor({
                       </Button>
                     )}
                   </div>
-                  {abilityGroup === "class" && <OrganizationClass sheet={sheet} mode="abilities" readOnly={readOnly} />}
+                  {abilityGroup === "percentage" && <OrganizationClass sheet={sheet} mode="abilities" readOnly={readOnly} />}
                   <div className="space-y-2">
                     {sheet.abilities.map((ability) => (
                       <Dialog
@@ -1062,7 +1068,7 @@ export function OrganizationEditor({
                         </DialogContent>
                       </Dialog>
                     ))}
-                    {!sheet.abilities.some(
+                    {abilityGroup !== "percentage" && !sheet.abilities.some(
                       (ability) =>
                         abilityCategory(ability.origin) === abilityGroup,
                     ) && (
