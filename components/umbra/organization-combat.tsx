@@ -40,12 +40,10 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
   function adjustHp(amount: number) {
     update("hp", Math.min(maxHp, Math.max(0, currentHp + amount)));
   }
-  function adjustTemporaryHp(amount: number) {
-    update("tempHp", Math.max(0, temporaryHp + amount));
-  }
   return (
     <fieldset disabled={readOnly} className="min-w-0 space-y-5">
-      <div className="overflow-hidden rounded-2xl border border-rose-400/20 bg-gradient-to-br from-rose-950/45 via-black/20 to-black/10 shadow-[0_0_30px_rgba(244,63,94,.08)]">
+      <div className="grid min-w-0 gap-4 xl:grid-cols-2">
+      <div className="overflow-hidden rounded-2xl border border-rose-400/20 bg-gradient-to-br from-rose-950/45 via-black/20 to-black/10">
         <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex items-center gap-3">
             <div className="grid size-11 place-items-center rounded-xl border border-rose-300/20 bg-rose-500/15 text-rose-300">
@@ -55,12 +53,9 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
               <p className="text-xs font-semibold uppercase tracking-[.18em] text-rose-300/80">
                 Vitalidade
               </p>
-              <p className="mt-0.5 text-sm text-zinc-500">
-                Pontos de vida do personagem
-              </p>
             </div>
           </div>
-          <div className="flex items-center justify-center gap-1.5">
+          <div className="flex items-center justify-center gap-0 overflow-hidden rounded-xl border border-current/20 bg-black/20">
             <Button
               type="button"
               size="icon"
@@ -91,7 +86,7 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
           </div>
         </div>
         <div
-          className="relative flex h-3 overflow-hidden border-y border-white/[.05] bg-black/35"
+          className="relative mx-5 flex h-2 overflow-hidden rounded-full bg-black/35"
           role="progressbar"
           aria-label={`HP atual: ${currentHp} de ${maxHp}. HP temporário: ${temporaryHp}.`}
           aria-valuemin={0}
@@ -107,58 +102,18 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
             style={{ width: `${temporaryHpPercent}%` }}
           />
         </div>
-        <div className="grid gap-3 p-4 sm:grid-cols-3 sm:p-5">
+        <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
+
           <ResourceInput
-            label="HP atual"
-            value={sheet.hp}
-            onChange={(v) => update("hp", v)}
-          />
-          <ResourceInput
-            label={`HP máximo base (total: ${totals.hp})`}
+            label="HP máximo"
+            hint={`Base · total com atributos: ${totals.hp}`}
             value={sheet.hpBase}
             onChange={(v) => update("hpBase", v)}
           />
-          <div className="rounded-xl border border-amber-400/20 bg-amber-500/[.07] p-3 text-amber-300">
-            <span className="block text-xs font-semibold uppercase tracking-wider">
-              HP temporário
-            </span>
-            <div className="mt-2 flex items-center gap-2">
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={() => adjustTemporaryHp(-1)}
-                disabled={temporaryHp <= 0}
-                aria-label="Diminuir HP temporário em 1"
-                className="text-amber-200 hover:bg-amber-500/15 hover:text-white"
-              >
-                <Minus />
-              </Button>
-              <Input
-                type="number"
-                min={0}
-                aria-label="HP temporário"
-                className="h-auto min-w-0 border-0 bg-transparent p-0 text-center text-xl font-bold tabular-nums text-white shadow-none focus-visible:ring-0"
-                value={sheet.tempHp}
-                onChange={(e) =>
-                  update("tempHp", Math.max(0, Number(e.target.value) || 0))
-                }
-              />
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={() => adjustTemporaryHp(1)}
-                aria-label="Aumentar HP temporário em 1"
-                className="text-amber-200 hover:bg-amber-500/15 hover:text-white"
-              >
-                <Plus />
-              </Button>
-            </div>
-          </div>
+          <ResourceInput label="HP temporário" tone="amber" value={sheet.tempHp} onChange={(v) => update("tempHp", v)} />
         </div>
       </div>
-      <div className="overflow-hidden rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-950/45 via-black/20 to-black/10 shadow-[0_0_30px_rgba(139,92,246,.08)]">
+      <div className="overflow-hidden rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-950/45 via-black/20 to-black/10">
         <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex items-center gap-3">
             <div className="grid size-11 place-items-center rounded-xl border border-violet-300/20 bg-violet-500/15 text-violet-300">
@@ -168,12 +123,9 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
               <p className="text-xs font-semibold uppercase tracking-[.18em] text-violet-300/80">
                 Mana
               </p>
-              <p className="mt-0.5 text-sm text-zinc-500">
-                Energia para habilidades
-              </p>
             </div>
           </div>
-          <div className="flex items-center justify-center gap-1.5">
+          <div className="flex items-center justify-center gap-0 overflow-hidden rounded-xl border border-current/20 bg-black/20">
             <Button
               type="button"
               variant="ghost"
@@ -209,7 +161,7 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
           aria-valuemin={0}
           aria-valuemax={Math.max(totals.mana, 1)}
           aria-valuenow={Math.min(sheet.mana, Math.max(totals.mana, 1))}
-          className="h-3 overflow-hidden border-y border-white/[.05] bg-black/35"
+          className="mx-5 h-2 overflow-hidden rounded-full bg-black/35"
         >
           <div
             className="h-full bg-gradient-to-r from-violet-700 via-violet-500 to-fuchsia-400 shadow-[0_0_18px_rgba(139,92,246,.55)] transition-[width] duration-300"
@@ -219,36 +171,34 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
           />
         </div>
         <div className="grid gap-3 p-4 sm:grid-cols-2 sm:p-5">
+
           <ResourceInput
-            label="Mana atual"
-            value={sheet.mana}
-            onChange={(v) => update("mana", v)}
-            tone="violet"
-          />
-          <ResourceInput
-            label={`Mana máxima base (total: ${totals.mana})`}
+            label="Mana máxima"
+            hint={`Base · total com atributos: ${totals.mana}`}
             value={sheet.manaBase}
             onChange={(v) => update("manaBase", v)}
             tone="violet"
           />
         </div>
       </div>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      </div>
+      <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[.16em] text-zinc-400">Defesas e mobilidade<span aria-hidden="true" className="h-px flex-1 bg-white/10" /></div>
+      <div className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_.72fr]">
         <Metric
           label="CA"
-          description={`Redução de dano físico · ${sheet.armor} base + ${sheet.armorBonus} equipamentos`}
+          description="Redução de dano físico"
           icon={Shield}
           tone="border-sky-400/20 bg-sky-500/[.07] text-sky-300"
           total={sheet.armor + sheet.armorBonus}
         >
           <ResourceInput
-            label="CA base"
+            label="Base" accessibleLabel="CA base"
             tone="blue"
             value={sheet.armor}
             onChange={(v) => update("armor", v)}
           />
           <ResourceInput
-            label="CA dos equipamentos"
+            label="Equipamentos" accessibleLabel="CA dos equipamentos"
             tone="blue"
             value={sheet.armorBonus}
             onChange={(v) => update("armorBonus", v)}
@@ -256,19 +206,19 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
         </Metric>
         <Metric
           label="MR"
-          description={`Redução de dano mágico · ${sheet.mr} base + ${sheet.mrBonus} equipamentos`}
+          description="Redução de dano mágico"
           icon={ShieldCheck}
           tone="border-violet-400/20 bg-violet-500/[.07] text-violet-300"
           total={sheet.mr + sheet.mrBonus}
         >
           <ResourceInput
-            label="MR base"
+            label="Base" accessibleLabel="MR base"
             tone="violet"
             value={sheet.mr}
             onChange={(v) => update("mr", v)}
           />
           <ResourceInput
-            label="MR dos equipamentos"
+            label="Equipamentos" accessibleLabel="MR dos equipamentos"
             tone="violet"
             value={sheet.mrBonus}
             onChange={(v) => update("mrBonus", v)}
@@ -276,7 +226,7 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
         </Metric>
         <Metric
           label="Deslocamento"
-          description={`Metros por turno · ${sheet.movementBase} base + ${totals.movement - sheet.movementBase} de Destreza`}
+          description="m / turno"
           icon={Footprints}
           tone="border-emerald-400/20 bg-emerald-500/[.07] text-emerald-300"
           onAdjust={(delta) =>
@@ -284,132 +234,59 @@ export function OrganizationCombat({ sheet, update, readOnly = false }: Props) {
           }
           total={totals.movement}
         >
-          <ResourceInput
-            showStepper={false}
-            label="Base em metros"
-            tone="emerald"
-            value={sheet.movementBase}
-            onChange={(v) => update("movementBase", v)}
-          />
+
         </Metric>
       </div>
     </fieldset>
   );
 }
-function ResourceInput({
-  label,
-  value,
-  onChange,
-  tone = "rose",
-  showStepper = true,
-}: {
+function ResourceInput({ label, accessibleLabel, value, onChange, tone = "rose", hint }: {
   label: string;
+  accessibleLabel?: string;
   value: number;
   onChange: (v: number) => void;
-  tone?: "rose" | "violet" | "blue" | "emerald";
-  showStepper?: boolean;
+  tone?: "rose" | "violet" | "blue" | "amber";
+  hint?: string;
 }) {
+  const name = accessibleLabel ?? label;
   return (
-    <div
-      className={`block rounded-xl border p-3 transition-colors ${{ rose: "border-rose-400/20 bg-rose-500/[.07] text-rose-300", violet: "border-violet-400/20 bg-violet-500/[.07] text-violet-300", blue: "border-sky-400/20 bg-sky-500/[.07] text-sky-300", emerald: "border-emerald-400/20 bg-emerald-500/[.07] text-emerald-300" }[tone]}`}
-    >
-      <span className="block text-xs font-semibold uppercase tracking-wider">
-        {label}
-      </span>
-      <div className="mt-2 flex items-center gap-2">
-        {showStepper && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={`Diminuir ${label} em 1`}
-            disabled={value <= 0}
-            onClick={() => onChange(Math.max(0, value - 1))}
-          >
-            <Minus />
-          </Button>
-        )}
-        <Input
-          aria-label={label}
-          type="number"
-          min={0}
-          className="mt-2 h-auto border-0 bg-transparent p-0 text-xl font-bold tabular-nums text-white shadow-none focus-visible:ring-0"
-          value={value}
-          onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))}
-        />
-        {showStepper && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={`Aumentar ${label} em 1`}
-            onClick={() => onChange(value + 1)}
-          >
-            <Plus />
-          </Button>
-        )}
+    <div className="min-w-0">
+      <div className={`flex flex-wrap items-center justify-between gap-2 ${{ rose: "text-rose-300", violet: "text-violet-300", blue: "text-sky-300", amber: "text-amber-300" }[tone]}`}>
+        <span className="text-sm">{label}</span>
+        <div className="inline-flex shrink-0 items-center overflow-hidden rounded-xl border border-current/20 bg-black/20">
+          <Button type="button" variant="ghost" size="icon" className="rounded-none text-inherit hover:bg-white/10 hover:text-white" aria-label={`Diminuir ${name} em 1`} disabled={value <= 0} onClick={() => onChange(Math.max(0, value - 1))}><Minus /></Button>
+          <Input aria-label={name} type="number" min={0} className="h-9 w-16 rounded-none border-0 bg-transparent px-1 text-center font-bold tabular-nums text-white shadow-none [appearance:textfield] focus-visible:ring-inset [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none" value={value} onChange={(e) => onChange(Math.max(0, Number(e.target.value) || 0))} />
+          <Button type="button" variant="ghost" size="icon" className="rounded-none text-inherit hover:bg-white/10 hover:text-white" aria-label={`Aumentar ${name} em 1`} onClick={() => onChange(value + 1)}><Plus /></Button>
+        </div>
       </div>
+      {hint && <p className="mt-2 text-xs text-zinc-500">{hint}</p>}
     </div>
   );
 }
-function Metric({
-  label,
-  description,
-  icon: Icon,
-  tone,
-  total,
-  onAdjust,
-  children,
-}: {
+function Metric({ label, description, icon: Icon, tone, total, onAdjust, children }: {
   label: string;
   description: string;
   icon: typeof Shield;
   tone: string;
   total: number;
   onAdjust?: (delta: number) => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }) {
   return (
-    <div
-      className={`group rounded-2xl border p-4 transition-all hover:-translate-y-0.5 hover:brightness-110 ${tone}`}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[.16em]">
-            {label}
-          </p>
-          <p className="mt-1 text-xs text-zinc-500">{description}</p>
+    <section aria-label={label} className={`min-w-0 rounded-2xl border p-4 sm:p-5 ${tone}`}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2"><Icon aria-hidden="true" size={20} /><h3 className="text-xs font-bold uppercase tracking-[.14em]">{label}</h3></div>
+          {!onAdjust && <p className="mt-2 text-xs text-zinc-400">{description}</p>}
         </div>
-        <Icon size={18} />
+        {!onAdjust && <output aria-label={`Total ${label}`} className="text-3xl font-bold tabular-nums text-white">{total}</output>}
       </div>
-      <div className="my-4 flex items-center justify-center gap-3">
-        {onAdjust && (
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            aria-label={`Diminuir ${label} em 1`}
-            onClick={() => onAdjust(-1)}
-          >
-            <Minus />
-          </Button>
-        )}
-        <output className="min-w-20 text-center text-3xl font-bold tabular-nums text-white">
-          {total}
-        </output>
-        {onAdjust && (
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            aria-label={`Aumentar ${label} em 1`}
-            onClick={() => onAdjust(1)}
-          >
-            <Plus />
-          </Button>
-        )}
-      </div>
-      <div className="grid gap-2">{children}</div>
-    </div>
+      {onAdjust ? <div className="mt-6 flex flex-col items-center gap-2"><div className="inline-flex items-center overflow-hidden rounded-xl border border-current/20 bg-black/20">
+        <Button type="button" size="icon" variant="ghost" className="rounded-none text-inherit" aria-label={`Diminuir ${label} em 1`} onClick={() => onAdjust(-1)}><Minus /></Button>
+        <output className="min-w-16 text-center text-3xl font-bold tabular-nums text-white">{total}</output>
+        <Button type="button" size="icon" variant="ghost" className="rounded-none text-inherit" aria-label={`Aumentar ${label} em 1`} onClick={() => onAdjust(1)}><Plus /></Button>
+      </div><span className="text-sm text-zinc-400">{description}</span></div> : <div className="mt-4 divide-y divide-white/10 border-t border-white/10 [&>div]:py-3 [&>div:last-child]:pb-0">{children}</div>}
+    </section>
   );
 }
+
